@@ -1,0 +1,50 @@
+html{
+    color-scheme: light dark;
+}
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: grid;
+}
+#word {
+    font-size: 3rem;
+    margin-top: 20px;
+    z-index: -1;
+}
+form{
+    position: relative;
+    place-self: center;
+}
+#input {
+    margin-top: 10px;
+    z-index: 1;
+    top: 1.25rem;
+    left: 0;
+    border: none;
+    position: absolute;
+    font-family: monospace;
+    font-size: 2rem;
+    letter-spacing: 1.25rem;
+    width: inherit;
+    outline: none;
+    background: transparent;
+}
+button{
+    margin: 2rem 0;
+    font-size: 2rem;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+    /* display: flex; */
+    /* width: 50%; */
+    /* margin: auto; */
+}
+ul li b{
+    font-size: 4rem;
+}
+summary{
+    font-size: 2rem;
+    cursor: pointer;
+    color: #888;
+}
