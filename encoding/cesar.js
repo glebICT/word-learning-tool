@@ -51,6 +51,13 @@ function encrypt() {
 
 for (let i = 0; i < 26; i++) {
     const letterEl = document.createElement("li");
-    letterEl.textContent = `${i + 1}: ${String.fromCharCode(i + 65)}`;
+    letterEl.textContent = `${i + 1} ${String.fromCharCode(i + 65)}`;
     lettersEl.appendChild(letterEl);
 }
+const value = document.querySelector("#value");
+const input = document.querySelector("#shift");
+value.textContent = input.value;
+
+input.addEventListener("input", (event) => {
+  value.textContent = event.target.value;
+});

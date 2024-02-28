@@ -1,0 +1,12 @@
+html{
+    color-scheme: light dark;
+}
+body {
+    font-family: system-ui;
+    text-align: center;
+    display: grid;
+}
+button{
+    margin: 2rem 0;
+    font-size: 2rem;
+}

@@ -1,0 +1,49 @@
+html{
+    color-scheme: light dark;
+}
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+input[type="text"], textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+textarea{
+    resize: none;
+}
+
+#output {
+    font-size: 18px;
+    margin-top: 20px;
+}
+ul#letters{
+    display: flex;
+    gap: 1rem
+}
+ul#letters li{
+    display: inline-flex;
+    width: 1rem;
+    text-align: center;
+}
