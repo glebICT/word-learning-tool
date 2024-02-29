@@ -1,15 +1,16 @@
 
 #word {
-    font-size: 3rem;
+    font-size: 2rem;
     margin-top: 20px;
-    z-index: -1;
+    letter-spacing: 0ch;
+    font-family: monospace;
 }
 form{
     position: relative;
     place-self: center;
 }
 #input {
-    margin-top: 10px;
+    margin-top: -10px;
     z-index: 1;
     top: 1.25rem;
     left: 0;
@@ -17,10 +18,11 @@ form{
     position: absolute;
     font-family: monospace;
     font-size: 2rem;
-    letter-spacing: 1.25rem;
+    letter-spacing: 1ch;
     width: inherit;
     outline: none;
     background: transparent;
+    padding: 0;
 }
 
 ul {
