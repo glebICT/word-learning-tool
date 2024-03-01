@@ -1,4 +1,4 @@
-const words = [ "banana", "cat", "elephant", "door", "chair", "giraffe"];
+const words = [ "banana", "cat", "elephant", "door", "heart", "giraffe"];
 const randomIndex = Math.floor(Math.random() * words.length);
 const targetWord = words[randomIndex];
 window.onload = function () {
