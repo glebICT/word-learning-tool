@@ -1,43 +1,42 @@
 const letter1 = document.getElementById("letter1");
 const letter2 = document.getElementById("letter2");
 const correctAnswer = document.getElementById("correct-answer");
-const scoreEl = document.getElementById("score");
+
 let score = 0;
-letter1.addEventListener("click", function () {
-    if (letter1.textContent === "i") {
-        letter1.classList.add("correct");
-        score++;
-        scoreEl.textContent = "Score: " + score;
-        updateLetters();
-    } else {
-        letter1.classList.add("incorrect");
-    }
-});
 
-letter2.addEventListener("click", function () {
-    if (letter2.textContent === "1") {
-        letter2.classList.add("correct");
-        score++;
-        scoreEl.textContent = "Score: " + score;
-        updateLetters();
-    } else {
-        letter2.classList.add("incorrect");
+function updateScore(event){
+    console.log(event.classList.contains('correct'));
+    if(event.classList.contains('correct')){
+        score = score+1;
+    }else{
+        score = score-1;
     }
-});
+    console.log(score);
+    const scoreEl = document.getElementById("score");
+    scoreEl.textContent = "Score: " + score;
+    updateLetters()
+}
 
-correctAnswer.addEventListener("click", function () {
-    if (correctAnswer.textContent === "j") {
-        correctAnswer.classList.add("correct");
-        score++;
-        scoreEl.textContent = "Score: " + score;
-        updateLetters();
-    } else {
-        correctAnswer.classList.add("incorrect");
+
+function setLetters(correctLetter) {
+    const letters = ["i", "l", "j", "1"];
+    letters.sort(() => Math.random() - 0.5);
+    const buttons = document.getElementsByClassName('letter');
+    for (let index = 0; index < buttons.length; index++) {
+        const button = buttons[index];
+        button.textContent = letters[index]
+        button.classList.remove("correct", "incorrect");
+        if(letters[index] === correctLetter){
+            button.classList.add("correct");
+        }
+        
     }
-});
+   
+}
 
 function updateLetters() {
     const images = ['jam.png', 'log.png', 'ice.png'];
+   
 
     const webSafeFonts = [
         "Arial, sans-serif",
@@ -54,19 +53,13 @@ function updateLetters() {
         "MS Gothic, sans-serif",
         "MS Mincho, serif"
     ];
+
     const randomIndex = Math.floor(Math.random() * webSafeFonts.length);
     const randomImgIndex = Math.floor(Math.random() * images.length);
     document.body.style.fontFamily = webSafeFonts[randomIndex];
     document.getElementById('centered-image').src = images[randomImgIndex];
 
-    const letters = ["i", "l", "j", "1"];
-    letters.sort(() => Math.random() - 0.5);
-
-    letter1.textContent = letters[0];
-    letter1.classList.remove("correct", "incorrect");
-    letter2.textContent = letters[1];
-    letter2.classList.remove("correct", "incorrect");
-    correctAnswer.textContent = letters[2];
-    correctAnswer.classList.remove("correct", "incorrect");
+    setLetters(images[randomImgIndex].charAt(0))
+   
 }
 

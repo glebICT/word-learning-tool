@@ -8,7 +8,7 @@ body {
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 3rem;
     font-family: system-ui;
 }
 
@@ -21,16 +21,15 @@ h1 {
 
 .letter {
     font-size: 2rem;
-    padding: 20px;
     height: 5rem;
-    width: 3rem;
+    width: 5rem;
     border: 1px solid #ccc;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: 2rem;
     background: none;
 }
 

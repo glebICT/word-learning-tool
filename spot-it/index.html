@@ -4,26 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Letter Matching</title>
+    <title>First Letter Matching</title>
     <link rel="stylesheet" href="../common.css">
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
 </head>
 
 <body onload="updateLetters()">
-    <h1>Letter Matching</h1>
+    <h1>First Letter Matching</h1>
     <div class="letter-container">
-        <button class="letter" id="letter1">i</button>
-        <button class="letter" id="letter2">1</button>
+        <button class="letter" onclick="updateScore(this)"></button>
+        <button class="letter" onclick="updateScore(this)"></button>
     </div>
     <img id="centered-image" src="jam.png" alt="Centered Image">
     <div class="letter-container">
-        <button class="letter" id="letter3">l</button>
-        <button class="letter" id="correct-answer">j</button>
+        <button class="letter" onclick="updateScore(this)"></button>
+        <button class="letter" onclick="updateScore(this)"></button>
     </div>
     <p id="score">Score: 0</p>
-
-
 </body>
 
 </html>
