@@ -39,19 +39,19 @@ function updateLetters() {
    
 
     const webSafeFonts = [
-        "Arial, sans-serif",
-        "Verdana, sans-serif",
-        "Tahoma, sans-serif",
-        "Trebuchet MS, sans-serif",
-        "Times New Roman, serif",
-        "Georgia, serif",
-        "Garamond, serif",
-        "Courier New, monospace",
-        "Arial Black, sans-serif",
-        "Impact, sans-serif",
-        "Comic Sans MS, cursive",
-        "MS Gothic, sans-serif",
-        "MS Mincho, serif"
+        "Arial",
+        "Verdana",
+        "Tahoma",
+        "Trebuchet MS",
+        "Times New Roman",
+        "Georgia",
+        "Garamond",
+        "Courier New",
+        "Arial Black",
+        "Impact",
+        "Comic Sans MS",
+        "MS Gothic",
+        "MS Mincho"
     ];
 
     const randomIndex = Math.floor(Math.random() * webSafeFonts.length);
