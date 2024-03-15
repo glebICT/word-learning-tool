@@ -1,0 +1,33 @@
+
+body{
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+table{
+    display: flex;
+    margin: auto;
+    border: 2px solid buttontext;
+    position: relative;
+    margin-bottom: 2rem;
+}
+table td{
+    width: 2rem;
+    height: 2rem;
+    background: gray;
+    cursor: pointer;
+}
+table::after{
+    display: block;
+    content: "⬆️";
+    width: 2rem;
+    height: 2rem;
+    background: Window;
+    position: absolute;
+    bottom: -2rem;
+}
+output{
+    margin: 1rem;
+    font-size: 2rem;
+    font-family: monospace;
+}
