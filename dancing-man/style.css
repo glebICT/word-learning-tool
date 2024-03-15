@@ -1,0 +1,16 @@
+@font-face {
+    font-family: "DancingMan";
+    src: url('GlDancingmen-PvXr.ttf');
+}
+output{
+    font-family: 'DancingMan';
+    letter-spacing: 0.5rem;
+    font-size: 3rem;
+}
+section{
+    width: 400px;
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+    gap: 1rem;
+}
