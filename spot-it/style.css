@@ -34,14 +34,14 @@ h1 {
     background: none;
 }
 
-.letter.correct {
+/* .letter.correct {
     color: white;
 }
 
 .letter.incorrect {
     background-color: #ff0000;
     color: white;
-}
+} */
 
 #score {
     font-size: 24px;
