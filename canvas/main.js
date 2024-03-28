@@ -10,9 +10,30 @@ canvas.width = window.innerWidth - canvasOffsetX;
 canvas.height = window.innerHeight - canvasOffsetY;
 
 let isPainting = false;
+let isErasing = false; // Flag to track erasing mode
+
 let lineWidth = 5;
 let startX;
 let startY;
+
+canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault(); // Prevent the default context menu from appearing
+    if (e.button === 2) { // Check if the right mouse button is pressed
+        isErasing = !isErasing; // Toggle erasing mode
+        if (isErasing) {
+            ctx.globalCompositeOperation = 'destination-out'; // Set the composite operation to erase
+            isPainting = true; // Start erasing
+            startX = e.clientX - canvasOffsetX;
+            startY = e.clientY - canvasOffsetY;
+            lineWidth = ctx.lineWidth * 3;
+            // ctx.lineWidth = e.lineWidth *; // Set eraser line width
+        } else {
+            ctx.globalCompositeOperation = 'source-over'; // Reset composite operation for drawing
+            ctx.lineWidth = 5; // Set default line width for drawing
+        }
+    }
+  
+});
 
 toolbar.addEventListener('click', e => {
     if (e.target.id === 'clear') {
@@ -36,6 +57,7 @@ const draw = (e) => {
     if (!isPainting) {
         return;
     }
+     // Set the composite operation to erase
     ctx.strokeStyle = document.getElementById('stroke').value;
     ctx.lineWidth = lineWidth;
     ctx.lineCap = 'round';
@@ -51,12 +73,25 @@ canvas.addEventListener('mousedown', (e) => {
 });
 
 canvas.addEventListener('mouseup', e => {
-    isPainting = false;
-    ctx.stroke();
-    ctx.beginPath();
+   
+    if (e.button === 2 && isErasing) { // Check if the right mouse button is released in erasing mode
+        isPainting = false; // Stop erasing
+        ctx.globalCompositeOperation = 'source-over'; // Reset the composite operation
+        ctx.beginPath(); // Start a new path for drawing
+        isErasing = false; // Switch back to drawing mode
+        ctx.lineWidth = 5; // Set default line width for drawing
+    }
+    else{
+        isPainting = false;
+        ctx.stroke();
+        ctx.beginPath();
+    }
 });
 
-canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mousemove', e=>{
+    draw(e)
+
+});
 
 function generateSymbol() {
     const canvas = document.getElementById('symbol');
@@ -73,7 +108,8 @@ function generateSymbol() {
         'circumflex', 
         'tilde', 
         'colon',
-        'quote'
+        'quote',
+        'section'
     ]
     canvas.textContent = symbol[Math.floor(Math.random() * symbol.length)]
 }
