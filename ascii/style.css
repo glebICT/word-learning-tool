@@ -1,0 +1,53 @@
+body{
+    textarea{
+        resize: none;
+    }
+    details{
+        width: 1000px;
+        margin: auto;
+        margin-bottom: 1rem;
+        img{
+            margin-left: 1rem;
+        }
+        summary{
+        }
+        table{
+            tr{
+                &:hover{
+                    background: rgb(232,188,183);
+                }
+            }
+        }
+    }
+    main{
+        container-type: inline-size;
+        container-name: task;
+        display: flex;
+        flex-direction: column;
+        
+        section{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            gap: 1rem;
+            textarea{
+                padding: 1rem;
+                background: transparent;
+            }
+            pre{
+                line-height: 1.15;
+                font-family: monospace;
+                text-align: left;
+            }
+        }
+    }
+}
+@container task (width < 800px) {
+    main{
+        flex-direction: row;
+        section{
+            width: 100%;
+        }
+    }
+}
