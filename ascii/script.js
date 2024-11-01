@@ -47,9 +47,22 @@ const level5 = `
 const checkAnswer = () => {
     const text = document.getElementById('level5').value;
     console.log(text,level5, text === level5);
-    if (text == level5){
-        alert('You did it!');
-    }
+    // if (text == level5){
+    //     alert('You did it!');
+    // }
     
 }   
 
+const showAnswer = () => {
+    document.getElementById('level5').value = `
+                             ~~~~
+                            ~~
+                          _||____
+ /\ /\ /\                /\\\\\\\\
+//\\/\\/\\        __    /__\\\\\\\\  _,
+//\\/\\/\\     __/  \_  |__|_|_|__|   \__,
+ || || ||     '-o---o-' |  |/|\| /|   /\ \
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`;
+    
+}   
