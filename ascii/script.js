@@ -66,3 +66,14 @@ const showAnswer = () => {
 `;
     
 }   
+
+const recover = () => {
+    document.getElementById('level5').value = `                             ~~~~
+                            ~~
+                          _||____
+ /\ /\ /\                /\\\\\\\\
+//\\/\\/\\              /__\\\\\\\\  
+//\\/\\/\\       
+ || || ||`
+;
+}

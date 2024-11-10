@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Learning Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .word {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        input {
+            font-size: 24px;
+            padding: 10px;
+            width: 200px;
+        }
+        .message {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Layout Switching Game</h1>
+    <div class="word" id="word"></div>
+    <input type="text" id="input" placeholder="Type the word here">
+    <div class="message" id="message"></div>
+
+    <script>
+        const words = [
+            { word: 'cat', lang: 'en' },
+            { word: 'კატა', lang: 'ka' },
+            { word: 'кот', lang: 'ru' }
+        ];
+
+        let currentWordIndex = 0;
+
+        function showWord() {
+            const wordElement = document.getElementById('word');
+            wordElement.textContent = words[currentWordIndex].word;
+        }
+
+        function checkWord() {
+            const inputElement = document.getElementById('input');
+            const messageElement = document.getElementById('message');
+            const userInput = inputElement.value.trim();
+
+            if (userInput === words[currentWordIndex].word) {
+                messageElement.textContent = 'Correct!';
+                currentWordIndex = (currentWordIndex + 1) % words.length;
+                inputElement.value = '';
+                showWord();
+            } else {
+                messageElement.textContent = 'Try again!';
+            }
+        }
+
+        document.getElementById('input').addEventListener('input', checkWord);
+
+        showWord();
+    </script>
+</body>
+</html>
