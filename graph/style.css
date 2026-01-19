@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    color-scheme: light dark;
+}
+canvas {
+    border: 2px solid #333;
+    display: block;
+    margin: 10px 0;
+}
+#controls {
+    margin: 10px 0;
+}
+select,
+button {
+    padding: 8px;
+    margin: 5px;
+    font-size: 16px;
+}
+#status {
+    font-weight: bold;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}

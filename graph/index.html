@@ -2,32 +2,8 @@
 <html>
     <head>
         <title>Internet AS Routing Game</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-            }
-            canvas {
-                border: 2px solid #333;
-                display: block;
-                margin: 10px 0;
-            }
-            #controls {
-                margin: 10px 0;
-            }
-            select,
-            button {
-                padding: 8px;
-                margin: 5px;
-                font-size: 16px;
-            }
-            #status {
-                font-weight: bold;
-                padding: 10px;
-                background: #f0f0f0;
-                border-radius: 5px;
-            }
-        </style>
+        <link rel="stylesheet" href="style.css" />
+        <script src="script.js" defer></script>
     </head>
     <body>
         <h1>AP CSP: Internet Autonomous Systems Routing Game</h1>
@@ -47,12 +23,6 @@
         </div>
 
         <div>Status: <span id="status">Select and load Level 1</span></div>
-
         <canvas id="graph" width="900" height="600"></canvas>
-
-        <script src="script.js"></script>
-        <script>
-            initGame();
-        </script>
     </body>
 </html>
