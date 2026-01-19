@@ -101,8 +101,8 @@ function draw() {
 }
 
 function findPath() {
-  const senderIdx = nodes.findIndex((n) => n.id === "Sender");
-  const receiverIdx = nodes.findIndex((n) => n.id === "Receiver");
+  const senderIdx = nodes.findIndex((n) => n.id === "S");
+  const receiverIdx = nodes.findIndex((n) => n.id === "R");
 
   // Simple level-specific paths - STUDENT CHALLENGE: Implement BFS!
   switch (currentLevel) {
