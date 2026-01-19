@@ -16,6 +16,10 @@ async function initGame() {
     const response = await fetch("data.json");
     gameData = await response.json();
     updateLevelSelect();
+    
+    // Add event listener for automatic level loading
+    document.getElementById("levelSelect").addEventListener("change", loadLevel);
+    
     loadLevel();
   } catch (error) {
     console.error("Failed to load data.json:", error);
