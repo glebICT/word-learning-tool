@@ -104,16 +104,51 @@ function findPath() {
   const senderIdx = nodes.findIndex((n) => n.id === "S");
   const receiverIdx = nodes.findIndex((n) => n.id === "R");
 
+  // Validate if a path is actually possible given broken nodes
+  function isValidPath(path) {
+    // Check if any nodes in path are broken
+    for (let i = 0; i < path.length; i++) {
+      if (brokenNodes.has(nodes[path[i]].id)) {
+        return false;
+      }
+    }
+    
+    // Check if edges exist between consecutive nodes (directed edges)
+    for (let i = 0; i < path.length - 1; i++) {
+      const fromNode = path[i];
+      const toNode = path[i + 1];
+      const hasEdge = edges.some(edge => 
+        edge.from === fromNode && edge.to === toNode
+      );
+      if (!hasEdge) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
   // Simple level-specific paths - STUDENT CHALLENGE: Implement BFS!
   switch (currentLevel) {
-    case 0:
-      return [0, 1, 2];
-    case 1:
-      return brokenNodes.has("AS1") ? [0, 2, 3] : [0, 1, 3];
-    case 2:
-      return [0, 2, 4, 5];
-    case 3:
-      return [0, 1, 4, 6];
+    case 0: {
+      const path = [0, 1, 2];
+      return isValidPath(path) ? path : [];
+    }
+    case 1: {
+      const path1 = [0, 1, 3]; // S -> AS1 -> R
+      const path2 = [0, 2, 3]; // S -> AS2 -> R
+      if (isValidPath(path1)) return path1;
+      if (isValidPath(path2)) return path2;
+      return [];
+    }
+    case 2: {
+      const path = [0, 2, 4, 5]; // S -> AS2 -> AS4 -> R
+      return isValidPath(path) ? path : [];
+    }
+    case 3: {
+      const path = [0, 1, 4, 6]; // S -> AS1 -> AS4 -> R
+      return isValidPath(path) ? path : [];
+    }
     default:
       return [];
   }
