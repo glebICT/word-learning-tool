@@ -79,9 +79,9 @@ function draw() {
   nodes.forEach((node, index) => {
     ctx.fillStyle = brokenNodes.has(node.id)
       ? "red"
-      : node.id === "Sender"
-        ? "green"
-        : node.id === "Receiver"
+      : node.id === "S"
+        ? "lightgreen"
+        : node.id === "R"
           ? "orange"
           : "lightblue";
     ctx.beginPath();
