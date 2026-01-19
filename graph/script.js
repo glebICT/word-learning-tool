@@ -121,7 +121,7 @@ function findPath() {
 
 function sendPacket() {
   currentPath = findPath();
-  const receiverIdx = nodes.findIndex((n) => n.id === "Receiver");
+  const receiverIdx = nodes.findIndex((n) => n.id === "R");
   const success =
     currentPath.length > 0 &&
     currentPath[currentPath.length - 1] === receiverIdx;
