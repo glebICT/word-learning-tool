@@ -20,7 +20,7 @@ async function initGame() {
   } catch (error) {
     console.error("Failed to load data.json:", error);
     statusEl.textContent =
-      "Error: Could not load levels. Check data.json file.";
+      "Error: Could not load levels.";
   }
 }
 
@@ -146,8 +146,15 @@ function findPath() {
       return isValidPath(path) ? path : [];
     }
     case 3: {
-      const path = [0, 1, 4, 6]; // S -> AS1 -> AS4 -> R
-      return isValidPath(path) ? path : [];
+      // Try multiple possible paths for Complex Network
+      const path1 = [0, 1, 4, 6]; // S -> AS1 -> AS4 -> R
+      const path2 = [0, 1, 3, 5, 6]; // S -> AS1 -> AS3 -> AS5 -> R (the path you mentioned)
+      const path3 = [0, 2, 4, 6]; // S -> AS2 -> AS4 -> R
+      
+      if (isValidPath(path1)) return path1;
+      if (isValidPath(path2)) return path2;
+      if (isValidPath(path3)) return path3;
+      return [];
     }
     default:
       return [];
@@ -166,7 +173,7 @@ function sendPacket() {
     statusEl.style.color = "green";
   } else {
     statusEl.textContent =
-      "✗ FAILED - No path found. Check your findPath() algorithm!";
+      "✗ FAILED - No path found.";
     statusEl.style.color = "red";
   }
 
