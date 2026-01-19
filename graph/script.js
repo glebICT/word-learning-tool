@@ -103,6 +103,11 @@ function draw() {
 function findPath() {
   const senderIdx = nodes.findIndex((n) => n.id === "S");
   const receiverIdx = nodes.findIndex((n) => n.id === "R");
+  
+  // Debug logging
+  console.log("Current level:", currentLevel);
+  console.log("Broken nodes:", Array.from(brokenNodes));
+  console.log("Available nodes:", nodes.map(n => n.id));
 
   // Validate if a path is actually possible given broken nodes
   function isValidPath(path) {
@@ -128,37 +133,18 @@ function findPath() {
     return true;
   }
 
-  // Simple level-specific paths - STUDENT CHALLENGE: Implement BFS!
-  switch (currentLevel) {
-    case 0: {
-      const path = [0, 1, 2];
-      return isValidPath(path) ? path : [];
+  // Get valid paths from data.json for current level
+  const level = gameData.levels[currentLevel];
+  const validPaths = level.validPaths || [];
+  
+  // Try each valid path until we find one that works with current broken nodes
+  for (const path of validPaths) {
+    if (isValidPath(path)) {
+      return path;
     }
-    case 1: {
-      const path1 = [0, 1, 3]; // S -> AS1 -> R
-      const path2 = [0, 2, 3]; // S -> AS2 -> R
-      if (isValidPath(path1)) return path1;
-      if (isValidPath(path2)) return path2;
-      return [];
-    }
-    case 2: {
-      const path = [0, 2, 4, 5]; // S -> AS2 -> AS4 -> R
-      return isValidPath(path) ? path : [];
-    }
-    case 3: {
-      // Try multiple possible paths for Complex Network
-      const path1 = [0, 1, 4, 6]; // S -> AS1 -> AS4 -> R
-      const path2 = [0, 1, 3, 5, 6]; // S -> AS1 -> AS3 -> AS5 -> R (the path you mentioned)
-      const path3 = [0, 2, 4, 6]; // S -> AS2 -> AS4 -> R
-      
-      if (isValidPath(path1)) return path1;
-      if (isValidPath(path2)) return path2;
-      if (isValidPath(path3)) return path3;
-      return [];
-    }
-    default:
-      return [];
   }
+  
+  return []; // No valid path found
 }
 
 function sendPacket() {
