@@ -249,6 +249,70 @@
           }
         ]
       }
+    },
+    {
+      "name": "Network Clusters",
+      "nodes": [
+        { "id": "S", "x": 100, "y": 300 },
+        { "id": "CL1-A", "x": 250, "y": 200 },
+        { "id": "CL1-B", "x": 250, "y": 300 },
+        { "id": "CL1-C", "x": 250, "y": 400 },
+        { "id": "CORE1", "x": 400, "y": 250 },
+        { "id": "CORE2", "x": 400, "y": 350 },
+        { "id": "CL2-A", "x": 550, "y": 200 },
+        { "id": "CL2-B", "x": 550, "y": 300 },
+        { "id": "CL2-C", "x": 550, "y": 400 },
+        { "id": "R", "x": 700, "y": 300 }
+      ],
+      "edges": [
+        { "from": 0, "to": 1 },
+        { "from": 0, "to": 2 },
+        { "from": 0, "to": 3 },
+        { "from": 1, "to": 4 },
+        { "from": 2, "to": 4 },
+        { "from": 2, "to": 5 },
+        { "from": 3, "to": 5 },
+        { "from": 4, "to": 6 },
+        { "from": 4, "to": 7 },
+        { "from": 5, "to": 7 },
+        { "from": 5, "to": 8 },
+        { "from": 6, "to": 9 },
+        { "from": 7, "to": 9 },
+        { "from": 8, "to": 9 }
+      ],
+      "broken": ["CL1-B", "CORE2", "CL2-B"],
+      "validPaths": [
+        [0, 1, 4, 6, 9],
+        [0, 2, 4, 6, 9],
+        [0, 3, 5, 8, 9],
+        [0, 1, 4, 7, 9],
+        [0, 3, 5, 7, 9]
+      ],
+      "theory": {
+        "title": "Network Clustering and Hierarchies",
+        "content": [
+          {
+            "heading": "Network Clustering Concept",
+            "text": "Large networks are organized into <strong>clusters</strong> or groups of closely connected autonomous systems that work together to provide services and route traffic efficiently."
+          },
+          {
+            "heading": "Cluster Structure",
+            "text": "This level shows two clusters (<strong>CL1</strong> and <strong>CL2</strong>) connected through core backbone systems (<strong>CORE1</strong> and <strong>CORE2</strong>). Clusters typically represent geographic regions, organizations, or service providers."
+          },
+          {
+            "heading": "Intra-Cluster vs Inter-Cluster Routing",
+            "text": "<strong>Intra-cluster routing</strong> occurs within a cluster (like CL1-A to CL1-C), while <strong>inter-cluster routing</strong> connects different clusters through backbone systems. This hierarchical approach improves routing efficiency."
+          },
+          {
+            "heading": "Core Backbone Networks",
+            "text": "The <strong>CORE</strong> systems represent high-capacity backbone networks that interconnect multiple clusters. These systems handle large volumes of traffic between different network regions."
+          },
+          {
+            "heading": "Cluster Resilience",
+            "text": "Clusters provide fault isolation - failures within one cluster don't necessarily affect others. However, core backbone failures can impact multiple clusters simultaneously, as demonstrated here."
+          }
+        ]
+      }
     }
   ]
 }
