@@ -1,25 +1,74 @@
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --canvas-bg: #2d2d30;
+        --canvas-border: #666;
+        --node-sender: #4caf50;
+        --node-receiver: #ff9800;
+        --node-normal: #2196f3;
+        --node-broken: #f44336;
+        --edge-color: #64b5f6;
+        --path-highlight: #ffeb3b;
+        --control-bg: #3a3a3a;
+        --status-bg: #424242;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #222222;
+        --canvas-bg: #f8f9fa;
+        --canvas-border: #333;
+        --node-sender: #28a745;
+        --node-receiver: #fd7e14;
+        --node-normal: #17a2b8;
+        --node-broken: #dc3545;
+        --edge-color: #007bff;
+        --path-highlight: #ffc107;
+        --control-bg: #f8f9fa;
+        --status-bg: #e9ecef;
+    }
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: system-ui;
     margin: 20px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
     color-scheme: light dark;
 }
 canvas {
-    border: 2px solid #333;
+    border: 2px solid var(--canvas-border);
     display: block;
     margin: 10px 0;
+    background: var(--canvas-bg);
 }
 #controls {
     margin: 10px 0;
+    background: var(--control-bg);
+    padding: 15px;
+    border-radius: 8px;
 }
 select,
 button {
     padding: 8px;
     margin: 5px;
     font-size: 16px;
+    border: 1px solid var(--canvas-border);
+    border-radius: 4px;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+button:hover {
+    opacity: 0.8;
 }
 #status {
     font-weight: bold;
     padding: 10px;
-    background: #f0f0f0;
+    background: var(--status-bg);
     border-radius: 5px;
+    margin: 10px 0;
 }
