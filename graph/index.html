@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Internet AS Routing Game</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            canvas {
+                border: 2px solid #333;
+                display: block;
+                margin: 10px 0;
+            }
+            #controls {
+                margin: 10px 0;
+            }
+            select,
+            button {
+                padding: 8px;
+                margin: 5px;
+                font-size: 16px;
+            }
+            #status {
+                font-weight: bold;
+                padding: 10px;
+                background: #f0f0f0;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>AP CSP: Internet Autonomous Systems Routing Game</h1>
+
+        <div id="controls">
+            <label>Level: </label>
+            <select id="levelSelect">
+                <option value="0">Level 1: Basic Path</option>
+                <option value="1">Level 2: Alternate Route</option>
+                <option value="2">Level 3: Multiple Failures</option>
+                <option value="3">Level 4: Complex Network</option>
+            </select>
+            <button onclick="loadLevel()">Load Level</button>
+            <button onclick="sendPacket()">Send Packet</button>
+            <button onclick="toggleBroken()">Toggle Node</button>
+            <button onclick="resetLevel()">Reset Level</button>
+        </div>
+
+        <div>Status: <span id="status">Select and load Level 1</span></div>
+
+        <canvas id="graph" width="900" height="600"></canvas>
+
+        <script src="script.js"></script>
+        <script>
+            initGame();
+        </script>
+    </body>
+</html>
