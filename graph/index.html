@@ -15,12 +15,43 @@
                 <option value="1">Level 2: Alternate Route</option>
                 <option value="2">Level 3: Multiple Failures</option>
                 <option value="3">Level 4: Complex Network</option>
+                <option value="4">Level 5: Ultimate Challenge</option>
             </select>
+            <button onclick="resetLevel()">Reset Level</button>
             <button onclick="sendPacket()">Send Packet</button>
             <button onclick="toggleBroken()">Toggle Node</button>
-            <button onclick="resetLevel()">Reset Level</button>
         </div>
         <div>Status: <span id="status">Select and load Level 1</span></div>
-        <canvas id="graph" width="900" height="600"></canvas>
+        <div class="game-container">
+            <canvas id="graph" width="900" height="600"></canvas>
+            <div class="theory-sidebar">
+                <h2>Autonomous Systems Theory</h2>
+                <div class="theory-content">
+                    <h3>What are Autonomous Systems?</h3>
+                    <p>An <strong>Autonomous System (AS)</strong> is a collection of connected Internet Protocol (IP) routing prefixes under the control of one or more network operators on behalf of a single administrative entity or domain.</p>
+                    
+                    <h3>Key Characteristics:</h3>
+                    <ul>
+                        <li><strong>Unique AS Number (ASN):</strong> Each AS has a unique identifier (e.g., AS1, AS2)</li>
+                        <li><strong>Single Administrative Domain:</strong> Managed by one organization</li>
+                        <li><strong>Common Routing Policy:</strong> Uses consistent routing decisions</li>
+                        <li><strong>Interior Gateway Protocol:</strong> Runs protocols like OSPF or RIP internally</li>
+                    </ul>
+                    
+                    <h3>Types of Autonomous Systems:</h3>
+                    <ul>
+                        <li><strong>Stub AS:</strong> Connected to only one other AS (like small organizations)</li>
+                        <li><strong>Transit AS:</strong> Carries traffic between other ASes (like major ISPs)</li>
+                        <li><strong>Multi-homed AS:</strong> Connected to multiple ASes but doesn't carry transit traffic</li>
+                    </ul>
+                    
+                    <h3>Routing Between ASes:</h3>
+                    <p>ASes communicate using the <strong>Border Gateway Protocol (BGP)</strong>, which determines the best paths for data to travel across the internet. When nodes fail, BGP automatically finds alternative routes.</p>
+                    
+                    <h3>In This Simulation:</h3>
+                    <p>You're managing packet routing through a network of ASes. Red nodes represent failed systems, and you must find valid paths from Sender (S) to Receiver (R) using available connections.</p>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

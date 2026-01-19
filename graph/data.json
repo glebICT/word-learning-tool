@@ -14,7 +14,32 @@
       "broken": [],
       "validPaths": [
         [0, 1, 2]
-      ]
+      ],
+      "theory": {
+        "title": "Understanding Network Nodes",
+        "content": [
+          {
+            "heading": "Network Components",
+            "text": "In this simulation, you'll work with three types of network nodes that form the backbone of internet communication."
+          },
+          {
+            "heading": "Sender (S)",
+            "text": "The <strong>Sender (S)</strong> node represents the source of data packets. This is where network communication begins. In real networks, this could be your computer sending a request to a web server."
+          },
+          {
+            "heading": "Autonomous Systems (AS)",
+            "text": "<strong>Autonomous Systems (AS)</strong> are intermediate network nodes that forward data packets toward their destination. Each AS (like AS1, AS2, etc.) represents an independent network operator managing their own routing policies."
+          },
+          {
+            "heading": "Receiver (R)",
+            "text": "The <strong>Receiver (R)</strong> node is the destination where data packets need to arrive. This represents the target server or service that the sender wants to communicate with."
+          },
+          {
+            "heading": "Network Paths",
+            "text": "A <strong>path</strong> is the route data takes from Sender to Receiver through various AS nodes. The goal is to find valid paths that successfully deliver packets despite network failures."
+          }
+        ]
+      }
     },
     {
       "name": "Alternate Route",
@@ -34,7 +59,32 @@
       "validPaths": [
         [0, 2, 3],
         [0, 1, 3]
-      ]
+      ],
+      "theory": {
+        "title": "Network Routing Principles",
+        "content": [
+          {
+            "heading": "What is Network Routing?",
+            "text": "<strong>Routing</strong> is the process of determining the optimal path for data packets to travel from source to destination across interconnected networks."
+          },
+          {
+            "heading": "Multiple Path Options",
+            "text": "Real networks provide <strong>redundancy</strong> by having multiple routes between any two points. This ensures communication continues even when parts of the network fail. Notice how this level offers two different paths from S to R."
+          },
+          {
+            "heading": "Routing Protocols",
+            "text": "In actual networks, protocols like <strong>BGP (Border Gateway Protocol)</strong> automatically calculate the best routes by sharing routing information between autonomous systems."
+          },
+          {
+            "heading": "Path Selection Criteria",
+            "text": "Routing algorithms consider factors like: shortest path, least congestion, lowest cost, and reliability when choosing routes."
+          },
+          {
+            "heading": "Dynamic Adaptation",
+            "text": "Modern routing systems continuously monitor network conditions and can switch to alternative paths within milliseconds when failures occur."
+          }
+        ]
+      }
     },
     {
       "name": "Multiple Failures",
@@ -58,7 +108,32 @@
       "validPaths": [
         [0, 2, 4, 5],
         [0, 1, 3, 5]
-      ]
+      ],
+      "theory": {
+        "title": "Network Failure and Resilience",
+        "content": [
+          {
+            "heading": "Network Failures Are Inevitable",
+            "text": "Network failures occur constantly in real internet infrastructure due to hardware malfunctions, fiber cuts, power outages, or maintenance."
+          },
+          {
+            "heading": "Impact of Single Points of Failure",
+            "text": "Notice how breaking <strong>AS1 and AS3</strong> eliminates one entire routing path. Good network design avoids single points of failure through redundancy."
+          },
+          {
+            "heading": "Fault Tolerance",
+            "text": "<strong>Fault tolerance</strong> means the network continues operating despite component failures. This level demonstrates how alternative paths maintain connectivity."
+          },
+          {
+            "heading": "Failure Detection and Recovery",
+            "text": "Modern networks use protocols that detect failures within seconds and automatically reroute traffic through working paths without human intervention."
+          },
+          {
+            "heading": "Designing Resilient Networks",
+            "text": "Network architects build redundancy at every level: multiple ISPs, diverse physical paths, backup systems, and automatic failover mechanisms."
+          }
+        ]
+      }
     },
     {
       "name": "Complex Network",
@@ -87,7 +162,93 @@
         [0, 1, 4, 6],
         [0, 1, 3, 5, 6],
         [0, 2, 4, 6]
-      ]
+      ],
+      "theory": {
+        "title": "Complex Network Topologies",
+        "content": [
+          {
+            "heading": "Scaling Network Complexity",
+            "text": "As networks grow larger, they become more complex with numerous interconnected autonomous systems forming intricate topologies."
+          },
+          {
+            "heading": "Mesh Networks",
+            "text": "This level demonstrates a <strong>mesh-like topology</strong> where multiple connections exist between nodes, providing numerous routing options and increased resilience."
+          },
+          {
+            "heading": "Load Distribution",
+            "text": "Complex networks distribute traffic across multiple paths to prevent congestion and optimize performance. Different routes may be chosen based on current network conditions."
+          },
+          {
+            "heading": "Hierarchical Routing",
+            "text": "Large networks often use hierarchical structures where regional networks connect to backbone providers, creating efficient routing hierarchies."
+          },
+          {
+            "heading": "Network Optimization Challenges",
+            "text": "Managing complex networks requires balancing multiple factors: performance, cost, security, and reliability while maintaining fault tolerance."
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ultimate Challenge",
+      "nodes": [
+        { "id": "S", "x": 100, "y": 300 },
+        { "id": "AS1", "x": 200, "y": 150 },
+        { "id": "AS2", "x": 200, "y": 450 },
+        { "id": "AS3", "x": 350, "y": 250 },
+        { "id": "AS4", "x": 350, "y": 350 },
+        { "id": "AS5", "x": 500, "y": 150 },
+        { "id": "AS6", "x": 500, "y": 450 },
+        { "id": "AS7", "x": 650, "y": 300 },
+        { "id": "R", "x": 800, "y": 300 }
+      ],
+      "edges": [
+        { "from": 0, "to": 1 },
+        { "from": 0, "to": 2 },
+        { "from": 1, "to": 3 },
+        { "from": 2, "to": 4 },
+        { "from": 3, "to": 5 },
+        { "from": 4, "to": 6 },
+        { "from": 5, "to": 7 },
+        { "from": 6, "to": 7 },
+        { "from": 7, "to": 8 },
+        { "from": 1, "to": 4 },
+        { "from": 2, "to": 3 },
+        { "from": 5, "to": 8 },
+        { "from": 6, "to": 8 }
+      ],
+      "broken": ["AS1", "AS5", "AS7"],
+      "validPaths": [
+        [0, 2, 4, 6, 8],
+        [0, 1, 3, 5, 8],
+        [0, 2, 3, 5, 8],
+        [0, 1, 4, 6, 8]
+      ],
+      "theory": {
+        "title": "Advanced Network Management",
+        "content": [
+          {
+            "heading": "Real-World Network Complexity",
+            "text": "This ultimate challenge simulates the complexity of real internet infrastructure with multiple simultaneous failures and numerous routing options."
+          },
+          {
+            "heading": "Cascading Failures",
+            "text": "Network failures can cascade through interconnected systems. Breaking <strong>AS1, AS5, and AS7</strong> creates complex failure scenarios that test advanced routing strategies."
+          },
+          {
+            "heading": "Redundancy Planning",
+            "text": "Enterprise networks require extensive redundancy planning with multiple ISPs, diverse physical paths, and automatic failover systems to maintain connectivity."
+          },
+          {
+            "heading": "Traffic Engineering",
+            "text": "Network operators use <strong>traffic engineering</strong> techniques to optimize path selection, balance loads, and ensure quality of service across complex topologies."
+          },
+          {
+            "heading": "Network Monitoring and Analytics",
+            "text": "Modern networks employ sophisticated monitoring tools that track performance metrics, detect anomalies, and predict potential failures before they impact users."
+          }
+        ]
+      }
     }
   ]
 }

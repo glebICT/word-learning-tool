@@ -50,6 +50,10 @@ function loadLevel() {
 
   statusEl.textContent = `Level ${currentLevel + 1}: ${level.name} - Broken: ${Array.from(brokenNodes).join(", ") || "None"}`;
   statusEl.style.color = "black";
+  
+  // Load theory content for this level
+  loadTheoryContent(level);
+  
   draw();
 }
 
@@ -187,5 +191,35 @@ function toggleBroken() {
 
   statusEl.textContent = `Toggled ${randNode.id} - Broken: ${Array.from(brokenNodes).join(", ") || "None"}`;
   draw();
+}
+
+function loadTheoryContent(level) {
+  const theoryContainer = document.querySelector(".theory-content");
+  if (!theoryContainer || !level.theory) return;
+
+  // Clear existing content
+  theoryContainer.innerHTML = "";
+
+  // Add title
+  const titleElement = document.createElement("h3");
+  titleElement.textContent = level.theory.title;
+  theoryContainer.appendChild(titleElement);
+
+  // Add content sections
+  level.theory.content.forEach(section => {
+    const heading = document.createElement("h4");
+    heading.textContent = section.heading;
+    theoryContainer.appendChild(heading);
+    
+    const paragraph = document.createElement("p");
+    paragraph.innerHTML = section.text;
+    theoryContainer.appendChild(paragraph);
+  });
+
+  // Update sidebar title to include level name
+  const sidebarTitle = document.querySelector(".theory-sidebar h2");
+  if (sidebarTitle) {
+    sidebarTitle.textContent = `${level.name} - Theory`; 
+  }
 }
 initGame();

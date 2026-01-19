@@ -118,7 +118,72 @@ button:active {
     border-left-color: #dc3545;
 }
 
+/* Game container layout */
+.game-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 10px;
+}
+
+/* Theory sidebar */
+.theory-sidebar {
+    flex: 0 0 450px;
+    background: var(--control-bg);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    align-self: flex-start;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.theory-sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--edge-color);
+    border-bottom: 2px solid var(--edge-color);
+    padding-bottom: 8px;
+}
+
+.theory-content h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.theory-content p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.theory-content ul {
+    margin: 10px 0 15px 20px;
+}
+
+.theory-content li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
 /* Responsive design */
+@media (max-width: 1200px) {
+    .game-container {
+        flex-direction: column;
+    }
+    
+    .theory-sidebar {
+        flex: 0 0 auto;
+        max-height: none;
+        width: 100%;
+        order: 2;
+    }
+    
+    canvas {
+        order: 1;
+    }
+}
+
 @media (max-width: 768px) {
     canvas {
         width: 100%;
@@ -136,5 +201,9 @@ button:active {
     button {
         flex: 1;
         min-width: 120px;
+    }
+    
+    .theory-sidebar {
+        padding: 15px;
     }
 }
