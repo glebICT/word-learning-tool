@@ -156,4 +156,3 @@ function toggleBroken() {
   statusEl.textContent = `Toggled ${randNode.id} - Broken: ${Array.from(brokenNodes).join(", ") || "None"}`;
   draw();
 }
-initGame();
