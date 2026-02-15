@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greek Quantifiers - Progressive Difficulty</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            max-width: 1000px; margin: 0 auto; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+        }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        #game-container { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); 
+        }
+        #level-selector { 
+            display: flex; 
+            gap: 12px; 
+            justify-content: center; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
+        }
+        .level-btn { 
+            padding: 14px 24px; 
+            border: none; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.4s; 
+            font-size: 16px; 
+            min-width: 120px;
+        }
+        .level-btn.active { 
+            background: #ffd700 !important; 
+            color: #333; 
+            transform: scale(1.08); 
+            box-shadow: 0 8px 25px rgba(255,215,0,0.4);
+        }
+        .level-btn:hover { transform: scale(1.05); }
+        .level-btn:nth-child(1) { background: #ff6b6b; color: white; }
+        .level-btn:nth-child(2) { background: #4ecdc4; color: white; }
+        .level-btn:nth-child(3) { background: #45b7d1; color: white; }
+        .level-btn:nth-child(4) { background: #96ceb4; color: white; }
+        .level-btn:nth-child(5) { background: #feca57; color: white; }
+        .level-btn:nth-child(6) { background: #ff9ff3; color: white; }
+        
+        #grid { 
+            display: grid; 
+            gap: 4px; 
+            margin: 25px auto; 
+            background: #2c3e50; 
+            padding: 20px; 
+            border-radius: 15px; 
+            justify-content: center;
+        }
+        .cell { 
+            background: #ecf0f1; 
+            border: 3px solid #3498db; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            border-radius: 10px; 
+            user-select: none;
+        }
+        .cell:hover { background: #d5dbdb; transform: scale(1.05); }
+        .cell.valid { border-color: #27ae60; background: #d5f4e6; }
+        .cell.invalid { border-color: #e74c3c; background: #fadbd8; animation: shake 0.5s; }
+        .cell.fixed { background: #95a5a6 !important; border-color: #7f8c8d; cursor: default; }
+        .cell.selected { background: #f39c12; border-color: #e67e22; color: white; }
+        
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            25% { transform: translateX(-5px); } 
+            75% { transform: translateX(5px); } 
+        }
+        
+        #controls { text-align: center; margin: 25px 0; }
+        button { 
+            padding: 14px 28px; 
+            font-size: 16px; 
+            margin: 8px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            transition: all 0.3s; 
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        #check { background: #27ae60; color: white; }
+        #new-game { background: #3498db; color: white; }
+        
+        #level-info { 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            color: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            margin: 25px 0; 
+            text-align: center;
+        }
+        .quantifier-symbol { 
+            font-size: 36px; 
+            color: #ffd700; 
+            font-weight: bold; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        #status { 
+            font-size: 20px; 
+            font-weight: bold; 
+            margin: 20px 0; 
+            padding: 20px; 
+            border-radius: 12px; 
+            text-align: center;
+        }
+        .status-win { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 3px solid #c3e6cb; 
+            animation: celebrate 1s ease-in-out;
+        }
+        .status-progress { 
+            background: #fff3cd; 
+            color: #856404; 
+            border: 3px solid #ffeaa7; 
+        }
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .grid-info { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 15px 0; 
+            font-size: 18px; 
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🥗 Greek Quantifiers - Progressive Logic</h1>
+        <p>From 2x2 to 6x6: Master quantifiers through increasing difficulty!</p>
+    </div>
+    
+    <div id="game-container">
+        <div id="level-selector">
+            <button class="level-btn active" onclick="loadLevel(1)">2x2 ∀</button>
+            <button class="level-btn" onclick="loadLevel(2)">3x3 ∃</button>
+            <button class="level-btn" onclick="loadLevel(3)">4x4 ∀∃</button>
+            <button class="level-btn" onclick="loadLevel(4)">4x4 ¬∀</button>
+            <button class="level-btn" onclick="loadLevel(5)">5x5 ∃!</button>
+            <button class="level-btn" onclick="loadLevel(6)">6x6 ∀∃¬</button>
+        </div>
+
+        <div id="level-info">
+            <h2 id="level-title">Level 1: 2x2 ∀ (Universal)</h2>
+            <p id="quantifier-explanation">
+                <span class="quantifier-symbol">∀</span> rows & columns: Each Greek letter appears exactly once per row/column.
+            </p>
+        </div>
+
+        <div class="grid-info">
+            <span id="grid-size">Grid: 2x2</span>
+            <span id="filled-count">Filled: 0/4</span>
+        </div>
+        
+        <div id="status" class="status-progress">
+            Click cells to cycle: Α → Β → Γ → Δ → empty (2x2 uses Α, Β only)
+        </div>
+        <div id="grid"></div>
+        
+        <div id="controls">
+            <button id="check" onclick="checkSolution()">✅ Check Solution</button>
+            <button id="new-game" onclick="resetLevel()">🔄 Reset Level</button>
+            <button onclick="showSolution()">💡 Show Solution</button>
+        </div>
+    </div>
+
+    <script>
+        let grid = [];
+        let currentLevel = 1;
+        let size = 2;
+        let letters = [' ', 'Α', 'Β'];
+        let solution = [];
+        let fixedCells = new Set();
+
+        const levels = {
+            1: { // 2x2 - ∀ Universal (Latin square)
+                size: 2, letters: [' ', 'Α', 'Β'], title: "2x2 ∀ Universal",
+                explanation: `<span class="quantifier-symbol">∀</span> rows/columns unique: ∀x∈rows ∃!letter∈{Α,Β}`,
+                hints: [[0,0,'Α']], solution: [['Α','Β'], ['Β','Α']], validator: validateUniversal
+            },
+            2: { // 3x3 - ∃ Existential (neighbor condition)
+                size: 3, letters: [' ', 'Α', 'Β', 'Γ'], title: "3x3 ∃ Neighbors", 
+                explanation: `<span class="quantifier-symbol">∃</span> neighbors: ∀letter ∃adjacent≠letter`,
+                hints: [[0,0,'Α'], [2,2,'Γ']], solution: [['Α','Β','Γ'], ['Γ','Α','Β'], ['Β','Γ','Α']], 
+                validator: validateExistentialNeighbors
+            },
+            3: { // 4x4 - ∀∃ Combined (Sudoku + no adjacent)
+                size: 4, letters: [' ', 'Α', 'Β', 'Γ', 'Δ'], title: "4x4 ∀∃ Combined",
+                explanation: `<span class="quantifier-symbol">∀∃</span>: ∀rows/cols unique ∧ ∀cells ∃no-adjacent-same`,
+                hints: [[0,0,'Α'], [1,3,'Δ'], [3,1,'Β']], solution: [['Α','Β','Γ','Δ'], ['Β','Γ','Δ','Α'], ['Γ','Δ','Α','Β'], ['Δ','Α','Β','Γ']], 
+                validator: validateCombined
+            },
+            4: { // 4x4 - ¬∀ (exactly 1 row violates uniqueness)
+                size: 4, letters: [' ', 'Α', 'Β', 'Γ', 'Δ'], title: "4x4 ¬∀ Exception",
+                explanation: `<span class="quantifier-symbol">¬∀</span>: Exactly 1 row has duplicate (¬∀rows(unique))`,
+                hints: [[0,0,'Α'], [1,0,'Α']], solution: [['Α','Β','Γ','Δ'], ['Α','Γ','Δ','Β'], ['Γ','Δ','Α','Β'], ['Δ','Α','Β','Γ']], 
+                validator: validateNotForAll
+            },
+            5: { // 5x5 - ∃! (exactly one magic row summing to 15)
+                size: 5, letters: [' ', 'Α', 'Β', 'Γ', 'Δ', 'Ε'], title: "5x5 ∃! Magic Row",
+                explanation: `<span class="quantifier-symbol">∃!</span>: Exactly one row sums to 15 (Α=1,Β=2,...,Ε=5)`,
+                hints: [[2,2,'Γ']], solution: [['Ε','Α','Β','Γ','Δ'], ['Δ','Ε','Α','Β','Γ'], ['Γ','Δ','Ε','Α','Β'], ['Β','Γ','Δ','Ε','Α'], ['Α','Β','Γ','Δ','Ε']], 
+                validator: validateUniqueExistence
+            },
+            6: { // 6x6 - ∀∃¬ Complex (multiple conditions)
+                size: 6, letters: [' ', 'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ'], title: "6x6 ∀∃¬ Master",
+                explanation: `<span class="quantifier-symbol">∀∃¬</span>: ∀rows/cols unique + ∃no-adjacents + ¬∀diagonals-unique`,
+                hints: [[0,0,'Α'], [5,5,'Ζ'], [2,3,'Δ']], solution: [['Α','Β','Γ','Δ','Ε','Ζ'], ['Β','Γ','Δ','Ε','Ζ','Α'], ['Γ','Δ','Ε','Ζ','Α','Β'], ['Δ','Ε','Ζ','Α','Β','Γ'], ['Ε','Ζ','Α','Β','Γ','Δ'], ['Ζ','Α','Β','Γ','Δ','Ε']], 
+                validator: validateMaster
+            }
+        };
+
+        function loadLevel(level) {
+            currentLevel = level;
+            const levelData = levels[level];
+            size = levelData.size;
+            letters = levelData.letters;
+            solution = levelData.solution;
+            
+            // Update UI
+            document.querySelectorAll('.level-btn').forEach((btn, i) => btn.classList.toggle('active', i+1 === level));
+            document.getElementById('level-title').textContent = levelData.title;
+            document.getElementById('quantifier-explanation').innerHTML = levelData.explanation;
+            document.getElementById('grid-size').textContent = `Grid: ${size}x${size}`;
+            
+            initGrid();
+            levelData.hints.forEach(([i,j,letter]) => {
+                grid[i][j] = letter;
+                fixedCells.add(`${i},${j}`);
+            });
+            render();
+        }
+
+        function initGrid() {
+            grid = Array(size).fill().map(() => Array(size).fill(' '));
+            fixedCells.clear();
+            updateFilledCount();
+        }
+
+        function render() {
+            const gridEl = document.getElementById('grid');
+            gridEl.style.gridTemplateColumns = `repeat(${size}, 65px)`;
+            gridEl.innerHTML = '';
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${fixedCells.has(`${i},${j}`) ? 'fixed' : ''}`;
+                    cell.style.width = '65px';
+                    cell.style.height = '65px';
+                    cell.style.fontSize = size > 4 ? '20px' : '26px';
+                    cell.textContent = grid[i][j];
+                    if (!fixedCells.has(`${i},${j}`)) {
+                        cell.onclick = () => cycleCell(i, j);
+                    }
+                    gridEl.appendChild(cell);
+                }
+            }
+            updateValidation();
+            updateFilledCount();
+        }
+
+        function cycleCell(row, col) {
+            if (fixedCells.has(`${row},${col}`)) return;
+            const idx = letters.indexOf(grid[row][col]);
+            grid[row][col] = letters[(idx + 1) % letters.length];
+            render();
+        }
+
+        function updateFilledCount() {
+            const filled = grid.flat().filter(c => c !== ' ').length;
+            const total = size * size;
+            document.getElementById('filled-count').textContent = `Filled: ${filled}/${total}`;
+            document.getElementById('status').textContent = 
+                `Click to cycle: ${letters.slice(1).join(' → ')} → empty (${size}x${size})`;
+        }
+
+        // Validators (same as before but adapted for variable size)
+        function validateUniversal(gridState) {
+            for (let i = 0; i < size; i++) {
+                const row = gridState[i].filter(c => c !== ' ');
+                if (new Set(row).size !== row.length || row.length !== size) return false;
+                const col = gridState.map(r => r[i]).filter(c => c !== ' ');
+                if (new Set(col).size !== col.length || col.length !== size) return false;
+            }
+            return true;
+        }
+
+        function validateExistentialNeighbors(gridState) {
+            for (let i = 0; i < size; i++) for (let j = 0; j < size; j++) {
+                if (gridState[i][j] === ' ') continue;
+                const dirs = [[0,1],[1,0],[0,-1],[-1,0]];
+                let hasNeighbor = false;
+                for (let [di,dj] of dirs) {
+                    const ni = i + di, nj = j + dj;
+                    if (ni>=0 && ni<size && nj>=0 && nj<size && gridState[ni][nj] !== ' ' && 
+                        gridState[ni][nj] !== gridState[i][j]) {
+                        hasNeighbor = true; break;
+                    }
+                }
+                if (!hasNeighbor) return false;
+            }
+            return true;
+        }
+
+        function validateCombined(gridState) {
+            // No adjacent same
+            for (let i = 0; i < size; i++) for (let j = 0; j < size; j++) {
+                if (gridState[i][j] === ' ') continue;
+                if (j < size-1 && gridState[i][j] === gridState[i][j+1]) return false;
+                if (i < size-1 && gridState[i][j] === gridState[i+1][j]) return false;
+            }
+            return validateUniversal(gridState);
+        }
+
+        function validateNotForAll(gridState) {
+            let duplicateRows = 0;
+            for (let i = 0; i < size; i++) {
+                const row = gridState[i].filter(c => c !== ' ');
+                if (new Set(row).size !== row.length || row.length !== size) duplicateRows++;
+            }
+            return duplicateRows === 1;
+        }
+
+        function validateUniqueExistence(gridState) {
+            const values = { 'Α':1, 'Β':2, 'Γ':3, 'Δ':4, 'Ε':5 };
+            let magicCount = 0;
+            for (let i = 0; i < size; i++) {
+                const rowSum = gridState[i].reduce((sum, cell) => sum + (values[cell] || 0), 0);
+                if (rowSum === 15) magicCount++;
+            }
+            return magicCount === 1;
+        }
+
+        function validateMaster(gridState) {
+            if (!validateCombined(gridState)) return false;
+            // Additional: exactly 2 diagonals have repeats
+            const diag1 = Array.from({length: size}, (_, i) => gridState[i][i]).filter(c => c !== ' ');
+            const diag2 = Array.from({length: size}, (_, i) => gridState[i][size-1-i]).filter(c => c !== ' ');
+            const diag1Unique = new Set(diag1).size === diag1.length;
+            const diag2Unique = new Set(diag2).size === diag2.length;
+            return !diag1Unique && !diag2Unique; // Both diagonals have repeats
+        }
+
+        function updateValidation() {
+            const cells = document.querySelectorAll('.cell:not(.fixed)');
+            let isComplete = grid.every(row => row.every(c => c !== ' '));
+            let isValid = levels[currentLevel].validator(grid);
+            
+            cells.forEach((cell, idx) => {
+                const i = Math.floor(idx / size), j = idx % size;
+                cell.classList.remove('valid', 'invalid');
+                if (grid[i][j] === ' ') return;
+                if ((j > 0 && grid[i][j] === grid[i][j-1]) || (i > 0 && grid[i][j] === grid[i-1][j])) {
+                    cell.classList.add('invalid');
+                } else {
+                    cell.classList.add('valid');
+                }
+            });
+
+            const statusEl = document.getElementById('status');
+            statusEl.className = isComplete && isValid ? 'status-win' : 'status-progress';
+        }
+
+        function checkSolution() {
+            const isComplete = grid.every(row => row.every(c => c !== ' '));
+            const isValid = levels[currentLevel].validator(grid);
+            
+            if (isComplete && isValid) {
+                alert(`🎉 Level ${currentLevel} (${size}x${size}) CONQUERED!\nAll quantifiers satisfied perfectly!`);
+            } else if (isComplete) {
+                alert(`❌ Invalid solution. Review Level ${currentLevel} quantifiers.`);
+            } else {
+                alert(`⏳ Fill all ${size}x${size} cells first!`);
+            }
+        }
+
+        function resetLevel() { loadLevel(currentLevel); }
+        function showSolution() { 
+            grid = solution.map(row => [...row]); 
+            render(); 
+        }
+
+        loadLevel(1);
+    </script>
+</body>
+</html>
