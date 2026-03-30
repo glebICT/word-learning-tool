@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Puzzle 1",
+    "categories": [
+      { "name": "Planets in our solar system", "color": "teal", "items": ["Mars", "Venus", "Saturn", "Jupiter", "Neptune"] },
+      { "name": "Types of triangles", "color": "purple", "items": ["Scalene", "Isosceles", "Equilateral", "Right", "Acute"] },
+      { "name": "Parts of a plant", "color": "amber", "items": ["Root", "Stem", "Leaf", "Flower", "Seed"] },
+      { "name": "Continents", "color": "coral", "items": ["Africa", "Asia", "Europe", "Antarctica", "Australia"] }
+    ]
+  },
+  {
+    "title": "Puzzle 2",
+    "categories": [
+      { "name": "Mammals", "color": "teal", "items": ["Whale", "Bat", "Dolphin", "Bear", "Rabbit"] },
+      { "name": "US state capitals", "color": "purple", "items": ["Austin", "Albany", "Denver", "Salem", "Juneau"] },
+      { "name": "Fractions equal to 1/2", "color": "amber", "items": ["2/4", "3/6", "4/8", "5/10", "6/12"] },
+      { "name": "Kinds of clouds", "color": "coral", "items": ["Cumulus", "Stratus", "Cirrus", "Nimbus", "Alto"] }
+    ]
+  },
+  {
+    "title": "Puzzle 3",
+    "categories": [
+      { "name": "Renewable energy", "color": "green", "items": ["Solar", "Wind", "Hydro", "Geothermal", "Tidal"] },
+      { "name": "Parts of speech", "color": "purple", "items": ["Noun", "Verb", "Adjective", "Adverb", "Pronoun"] },
+      { "name": "Bodies of water", "color": "blue", "items": ["Ocean", "River", "Lake", "Bay", "Gulf"] },
+      { "name": "Polygons by sides", "color": "amber", "items": ["Pentagon", "Hexagon", "Heptagon", "Octagon", "Decagon"] }
+    ]
+  }
+]
