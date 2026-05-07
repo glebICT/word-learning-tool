@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7-Segment Puzzle — Tests</title>
+<link rel="stylesheet" href="style.css">
+<style>
+    #test-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        font-family: var(--font-mono);
+    }
+    #test-summary {
+        font-size: 18px;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        border: 0.5px solid var(--color-border-secondary);
+        border-radius: var(--border-radius-md);
+    }
+    #test-summary.all-pass {
+        border-color: #5dcaa5;
+        color: #5dcaa5;
+    }
+    #test-summary.has-fail {
+        border-color: #e24b4a;
+        color: #e24b4a;
+    }
+    .test-result {
+        font-size: 13px;
+        padding: 6px 10px;
+        margin: 4px 0;
+        border-left: 2px solid var(--color-border-secondary);
+    }
+    .test-result.pass {
+        border-left-color: #5dcaa5;
+    }
+    .test-result.fail {
+        border-left-color: #e24b4a;
+        background: rgba(226, 75, 74, 0.08);
+    }
+    .test-result .name {
+        font-weight: 500;
+    }
+    .test-result .msg {
+        color: var(--color-text-secondary);
+        margin-top: 4px;
+        white-space: pre-wrap;
+    }
+    .marker {
+        display: inline-block;
+        width: 14px;
+    }
+    .pass .marker { color: #5dcaa5; }
+    .fail .marker { color: #e24b4a; }
+</style>
+</head>
+<body>
+<div id="test-wrap">
+    <h1 style="font-size: 18px; margin-bottom: 1rem;">[ 7-SEGMENT PUZZLE — TESTS ]</h1>
+    <div id="test-summary">running…</div>
+    <div id="test-results"></div>
+</div>
+
+<script src="logic.js"></script>
+<script src="tests.js"></script>
+</body>
+</html>

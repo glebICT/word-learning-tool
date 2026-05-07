@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7-Segment Puzzle</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-wrap">
+    <h2 class="sr-only">
+        7-Segment Display Puzzle Game — move segments to fix equations
+    </h2>
+
+    <div id="header">
+        <h1>[ 7-SEGMENT PUZZLE ]</h1>
+    </div>
+
+    <div id="status-bar">
+        <div class="stat">
+            <span class="stat-val" id="score-val">0</span><span>score</span>
+        </div>
+        <div class="stat">
+            <span class="stat-val" id="streak-val">0</span><span>streak</span>
+        </div>
+        <div class="stat">
+            <span class="stat-val" id="puzzle-num">1/12</span
+            ><span>puzzle</span>
+        </div>
+    </div>
+
+    <div id="puzzle-box">
+        <div id="score-flash">+10</div>
+        <div id="puzzle-label">▸ puzzle</div>
+        <div id="equation-row"></div>
+        <div id="instruction-box">loading...</div>
+        <div id="moves-indicator"></div>
+    </div>
+
+    <div id="result-msg"></div>
+
+    <div id="controls">
+        <button class="btn" id="btn-hint">hint</button>
+        <button class="btn" id="btn-reset">reset</button>
+        <button class="btn btn-primary" id="btn-next" style="display: none">
+            next →
+        </button>
+    </div>
+
+    <div id="puzzle-nav" style="margin-top: 1rem">
+        <div id="progress-dots"></div>
+    </div>
+</div>
+
+<script src="logic.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
