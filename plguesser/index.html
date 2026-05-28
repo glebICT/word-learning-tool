@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Programming Language Guesser</title>
+        <link rel="stylesheet" href="../common.css" />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <h1>Guess the Programming Language</h1>
+
+        <div id="mode-select">
+            <p class="mode-prompt">Choose a difficulty:</p>
+            <div class="mode-buttons">
+                <button type="button" class="mode-btn" data-length="8">
+                    Easy<span class="mode-count">8 questions</span>
+                </button>
+                <button type="button" class="mode-btn" data-length="16">
+                    Medium<span class="mode-count">16 questions</span>
+                </button>
+                <button type="button" class="mode-btn" data-length="32">
+                    Hard<span class="mode-count">32 questions</span>
+                </button>
+                <button type="button" class="mode-btn" data-length="64">
+                    Impossible<span class="mode-count">64 questions</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="game" hidden>
+            <div id="meta">
+                <span id="counter">1 / 10</span>
+                <span id="mode-label"></span>
+                <span id="score">Score: 0</span>
+            </div>
+            <pre id="snippet"></pre>
+            <form id="guess-form" autocomplete="off">
+                <input
+                    id="guess"
+                    type="text"
+                    list="languages"
+                    placeholder="Type a language…"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    required
+                />
+                <datalist id="languages"></datalist>
+                <button id="submit" type="submit">Guess</button>
+            </form>
+            <p id="result"></p>
+            <p id="tell"></p>
+            <button id="next" type="button" hidden>Next</button>
+        </div>
+
+        <div id="summary" hidden>
+            <h2>Round complete!</h2>
+            <p id="final-score"></p>
+            <button id="play-again" type="button">Play again</button>
+        </div>
+
+        <script src="snippets.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
