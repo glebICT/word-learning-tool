@@ -1,12 +1,3 @@
-// Snippet style guide:
-//   - language: canonical display name shown on answer buttons
-//   - category: language family (see LANGUAGE_CATEGORIES in script.js)
-//   - code: raw source as a string; preserve original indentation
-//   - tell: one short, beginner-friendly sentence naming the visual giveaway
-//   - keep code <= 15 lines and <= 80 chars per line
-//   - aim for snippets that exhibit at least one syntactic feature unique to
-//     the language (keywords, sigils, layout, stdlib calls)
-
 const SNIPPETS = [
   {
     language: "Python",
@@ -16,15 +7,16 @@ const SNIPPETS = [
         return n
     return fib(n - 1) + fib(n - 2)
 
+
 print(fib(10))`,
-    tell: "The 'def' keyword and significant indentation (no braces, no semicolons) are giveaways for Python.",
+    tell: "Created by Guido van Rossum and first released in 1991, Python is a general-purpose language widely used for web development, scripting, automation, data science, and education.",
   },
   {
     language: "Python",
     category: "Mainstream / Web",
     code: `squares = [x * x for x in range(10) if x % 2 == 0]
 print(squares)`,
-    tell: "List comprehensions like [expr for x in iterable if cond] are a Python signature.",
+    tell: "Created by Guido van Rossum and first released in 1991, Python is used for general-purpose programming, data analysis, automation, scientific computing, and teaching programming.",
   },
 
   {
@@ -34,8 +26,9 @@ print(squares)`,
     console.log(\`Hello, \${name}!\`);
 };
 
+
 greet("world");`,
-    tell: "'const' declarations, arrow functions (=>), and console.log are classic JavaScript.",
+    tell: "Created in 1995 by Brendan Eich at Netscape, JavaScript is the main language of the web and is used for browser apps, servers, and interactive user interfaces.",
   },
   {
     language: "JavaScript",
@@ -43,7 +36,7 @@ greet("world");`,
     code: `fetch("/api/users")
     .then((res) => res.json())
     .then((users) => console.log(users));`,
-    tell: "Promise chains with .then() and the global fetch() function are JavaScript-specific.",
+    tell: "Created in 1995 by Brendan Eich at Netscape, JavaScript powers web front ends, server-side apps through Node.js, and API-driven applications.",
   },
 
   {
@@ -54,7 +47,7 @@ greet("world");`,
         System.out.println("Hello, world!");
     }
 }`,
-    tell: "The exact phrase 'public static void main(String[] args)' and System.out.println only appear in Java.",
+    tell: "Created by James Gosling at Sun Microsystems and released in 1995, Java is widely used for enterprise software, Android apps, backend systems, and large-scale business applications.",
   },
   {
     language: "Java",
@@ -64,7 +57,7 @@ for (int i = 0; i < 5; i++) {
     nums.add(i * i);
 }
 System.out.println(nums);`,
-    tell: "Generic types like List<Integer> with 'new ArrayList<>()' and semicolons everywhere point to Java.",
+    tell: "Created by James Gosling at Sun Microsystems and released in 1995, Java is a mainstream choice for enterprise systems, Android, and cross-platform server software.",
   },
 
   {
@@ -72,11 +65,12 @@ System.out.println(nums);`,
     category: "Systems",
     code: `#include <stdio.h>
 
+
 int main(void) {
     printf("Hello, world!\\n");
     return 0;
 }`,
-    tell: "'#include <stdio.h>', 'int main(void)', and printf with an explicit \\n are C hallmarks.",
+    tell: "Created by Dennis Ritchie in the early 1970s at Bell Labs, C is used for operating systems, embedded software, compilers, and performance-critical systems programming.",
   },
   {
     language: "C",
@@ -86,9 +80,10 @@ int main(void) {
     int y;
 };
 
+
 struct Point p = {3, 4};
 printf("%d, %d\\n", p.x, p.y);`,
-    tell: "Declaring a 'struct' and later using 'struct Name var' (not just 'Name var') is pure C.",
+    tell: "Created by Dennis Ritchie in the early 1970s at Bell Labs, C remains a foundation for operating systems, drivers, embedded devices, and low-level software.",
   },
 
   {
@@ -97,7 +92,7 @@ printf("%d, %d\\n", p.x, p.y);`,
     code: `[1, 2, 3, 4, 5].each do |n|
   puts "n = #{n}"
 end`,
-    tell: "Blocks written as 'do |x| ... end' and 'puts' with #{...} interpolation are Ruby.",
+    tell: "Created by Yukihiro 'Matz' Matsumoto in the mid-1990s, Ruby is popular for web development, especially with Rails, plus scripting and automation.",
   },
   {
     language: "Ruby",
@@ -105,11 +100,12 @@ end`,
     code: `class Dog
   attr_accessor :name
 
+
   def initialize(name)
     @name = name
   end
 end`,
-    tell: "'attr_accessor', 'def initialize', and @instance variables are unmistakably Ruby.",
+    tell: "Created by Yukihiro 'Matz' Matsumoto in the mid-1990s, Ruby is used for web applications, developer tooling, and readable scripting.",
   },
 
   {
@@ -117,12 +113,14 @@ end`,
     category: "Systems",
     code: `package main
 
+
 import "fmt"
+
 
 func main() {
     fmt.Println("Hello, world!")
 }`,
-    tell: "'package main', 'import \"fmt\"', and 'func main()' are Go's calling card.",
+    tell: "Created at Google by Robert Griesemer, Rob Pike, and Ken Thompson and released in 2009, Go is widely used for cloud services, network tools, and infrastructure software.",
   },
   {
     language: "Go",
@@ -131,7 +129,7 @@ func main() {
 for i, n := range nums {
     fmt.Printf("%d: %d\\n", i, n)
 }`,
-    tell: "Short variable declaration ':=' and 'for ... := range ...' loops are Go.",
+    tell: "Created at Google by Robert Griesemer, Rob Pike, and Ken Thompson and released in 2009, Go is common in backend systems, DevOps tools, and distributed services.",
   },
 
   {
@@ -141,7 +139,7 @@ for i, n := range nums {
 for file in *.txt; do
     echo "Found: $file"
 done`,
-    tell: "The shebang #!/bin/bash, $variables, and 'for ... in ...; do ... done' are Bash idioms.",
+    tell: "Bash was created by Brian Fox for the GNU Project in 1989 and is used for shell scripting, system administration, automation, and Unix-like command-line work.",
   },
   {
     language: "Bash",
@@ -151,7 +149,7 @@ done`,
 else
     echo "No such file: $1" >&2
 fi`,
-    tell: "Test syntax 'if [ ... ]; then ... fi' and '$1' for arguments mark Bash scripts.",
+    tell: "Bash was created by Brian Fox for the GNU Project in 1989 and is the standard scripting shell for automation, administration, and command-line workflows.",
   },
 
   {
@@ -162,7 +160,7 @@ FROM users u
 JOIN orders o ON o.user_id = u.id
 GROUP BY u.name
 ORDER BY orders DESC;`,
-    tell: "Uppercase clauses like SELECT ... FROM ... JOIN ... GROUP BY are SQL.",
+    tell: "SQL was developed in the 1970s by Donald D. Chamberlin and Raymond F. Boyce at IBM, and it is used for querying and managing relational databases.",
   },
   {
     language: "SQL",
@@ -172,7 +170,7 @@ ORDER BY orders DESC;`,
     name TEXT NOT NULL,
     email TEXT UNIQUE
 );`,
-    tell: "CREATE TABLE with column types like INTEGER/TEXT and PRIMARY KEY is SQL DDL.",
+    tell: "SQL was developed in the 1970s by Donald D. Chamberlin and Raymond F. Boyce at IBM, and it is the standard language for database definition and querying.",
   },
 
   {
@@ -183,7 +181,7 @@ ORDER BY orders DESC;`,
        PROCEDURE DIVISION.
            DISPLAY "Hello, world!".
            STOP RUN.`,
-    tell: "Fixed-column layout, all-caps DIVISIONs, and 'DISPLAY ... STOP RUN' are COBOL.",
+    tell: "COBOL was designed in 1959 by a committee led by Grace Hopper and is used in business, government, and legacy mainframe systems.",
   },
   {
     language: "COBOL",
@@ -195,7 +193,7 @@ ORDER BY orders DESC;`,
        PROCEDURE DIVISION.
            ADD 1 TO WS-COUNT.
            DISPLAY "HELLO " WS-NAME.`,
-    tell: "PIC clauses like 'PIC 9(4)' and 'WORKING-STORAGE SECTION' are pure COBOL.",
+    tell: "COBOL was designed in 1959 by a committee led by Grace Hopper and remains important in finance, insurance, government, and mainframe processing.",
   },
 
   {
@@ -206,7 +204,7 @@ ORDER BY orders DESC;`,
    NAME = 'WORLD';
    PUT SKIP LIST('HELLO, ' || NAME);
 END HELLO;`,
-    tell: "'PROCEDURE OPTIONS(MAIN)', DECLARE, and 'PUT SKIP LIST' are PL/I.",
+    tell: "PL/I was created by IBM in the 1960s and was designed for scientific, engineering, and business computing on mainframes.",
   },
 
   {
@@ -221,7 +219,7 @@ feature
             print ("Hello, world!%N")
         end
 end`,
-    tell: "'create / make' blocks, 'feature' sections, and '%N' for newline are Eiffel.",
+    tell: "Eiffel was designed by Bertrand Meyer in the late 1980s and is known for teaching software engineering, design by contract, and reliable object-oriented systems.",
   },
 
   {
@@ -234,7 +232,7 @@ end`,
         print *, "Hello", i
     end do
 end program hello`,
-    tell: "'program ... end program', 'implicit none', and 'print *,' are modern Fortran.",
+    tell: "Fortran was created by John Backus and his IBM team in the 1950s and is widely used in numerical computing, science, engineering, and high-performance simulation.",
   },
   {
     language: "Fortran",
@@ -246,7 +244,7 @@ end program hello`,
       WRITE(*,*) 'AREA = ', A
       STOP
       END`,
-    tell: "Fixed-form columns, 'WRITE(*,*)', and '**' for power are classic FORTRAN 77.",
+    tell: "Fortran was created by John Backus and his IBM team in the 1950s and is used heavily in scientific computing, numerical modeling, and engineering software.",
   },
 
   {
@@ -259,7 +257,7 @@ begin
     for i := 1 to 5 do
         writeln('Hello ', i);
 end.`,
-    tell: "'program ... begin ... end.' with ':=' assignment and writeln is Pascal.",
+    tell: "Pascal was created by Niklaus Wirth in 1970 and was designed for teaching structured programming and later used in software development and education.",
   },
 
   {
@@ -270,7 +268,7 @@ procedure Hello is
 begin
     Ada.Text_IO.Put_Line ("Hello, world!");
 end Hello;`,
-    tell: "'with Ada.Text_IO' and 'procedure ... is begin ... end Name;' are Ada.",
+    tell: "Ada was designed in the late 1970s and early 1980s under Jean Ichbiah and was created for reliable, safety-critical software in defense, aerospace, and embedded systems.",
   },
 
   {
@@ -281,8 +279,9 @@ end Hello;`,
       1
       (* n (factorial (- n 1)))))
 
+
 (format t "~a~%" (factorial 10))`,
-    tell: "'defun', deeply nested parentheses, and 'format t' are Common Lisp.",
+    tell: "Lisp was invented by John McCarthy in 1958 and became a major language family for symbolic computing, AI research, and programmable language systems.",
   },
 
   {
@@ -293,8 +292,9 @@ end Hello;`,
       '()
       (cons (f (car lst)) (map f (cdr lst)))))
 
+
 (display (map (lambda (x) (* x x)) '(1 2 3)))`,
-    tell: "'define', 'lambda', 'car/cdr', and quoted lists are Scheme.",
+    tell: "Scheme was created in the 1970s by Guy L. Steele and Gerald Jay Sussman and is used in teaching, research, and functional programming.",
   },
 
   {
@@ -304,7 +304,7 @@ end Hello;`,
 sum := 0.
 1 to: 10 do: [ :i | sum := sum + i ].
 Transcript show: sum printString; cr.`,
-    tell: "Keyword messages like 'to:do:' with blocks '[ :x | ... ]' and Transcript are Smalltalk.",
+    tell: "Smalltalk emerged in the 1970s from Alan Kay, Dan Ingalls, Adele Goldberg, and colleagues at Xerox PARC, and it is influential in education, GUI software, and object-oriented design.",
   },
 
   {
@@ -314,7 +314,7 @@ Transcript show: sum printString; cr.`,
 20   PRINT "HELLO "; I
 30 NEXT I
 40 END`,
-    tell: "Line numbers (10, 20, 30) and 'FOR ... NEXT' with PRINT are classic BASIC.",
+    tell: "BASIC was created in 1964 by John G. Kemeny and Thomas E. Kurtz and was widely used for education, home computers, and beginner programming.",
   },
 
   {
@@ -323,12 +323,14 @@ Transcript show: sum printString; cr.`,
     code: `parent(tom, bob).
 parent(bob, ann).
 
+
 grandparent(X, Z) :-
     parent(X, Y),
     parent(Y, Z).
 
+
 ?- grandparent(tom, Who).`,
-    tell: "Facts ending in '.', ':-' for rules, and capitalized variables are Prolog.",
+    tell: "Prolog was created in 1972 by Alain Colmerauer and Philippe Roussel and is used in logic programming, rule-based systems, linguistics, and AI.",
   },
 
   {
@@ -336,7 +338,7 @@ grandparent(X, Z) :-
     category: "Array languages",
     code: `avg ← {(+/⍵)÷≢⍵}
 avg 1 2 3 4 5`,
-    tell: "Single-character glyphs like ⍵, ←, ÷, and ≢ make APL unmistakable.",
+    tell: "APL was created by Kenneth E. Iverson in the 1960s and is used for array processing, mathematical work, finance, and concise interactive programming.",
   },
 
   {
@@ -348,7 +350,7 @@ avg 1 2 3 4 5`,
       print((i, newline))
    OD
 END`,
-    tell: "Reversed-keyword brackets like 'DO ... OD' and ':=' are Algol 68.",
+    tell: "ALGOL 68 was designed by a committee led by Adriaan van Wijngaarden and is historically important for language design, structured programming, and algorithm notation.",
   },
 
   {
@@ -358,7 +360,7 @@ END`,
 say 'What is your name?'
 parse pull name
 say 'Hello,' name'!'`,
-    tell: "'/* ... */' comments, 'say', and 'parse pull' belong to REXX.",
+    tell: "REXX was created by Mike Cowlishaw at IBM in the late 1970s and is used for scripting, system administration, and automation on IBM and other platforms.",
   },
 
   {
@@ -370,7 +372,7 @@ BEGIN
     WriteString("Hello, world!");
     WriteLn;
 END Hello.`,
-    tell: "'MODULE ... END Name.' with 'FROM ... IMPORT' is Modula-2.",
+    tell: "Modula-2 was created by Niklaus Wirth in 1978 and was designed for systems programming, modular software, and teaching good software structure.",
   },
 
   {
@@ -379,12 +381,13 @@ END Hello.`,
     code: `#include <iostream>
 #include <vector>
 
+
 int main() {
     std::vector<int> v{1, 2, 3};
-    for (auto x : v) std::cout << x << "\\n";
+    for (auto x : v) std::cout << x << "\n";
     return 0;
 }`,
-    tell: "'std::' qualifiers, 'std::cout <<', and '#include <iostream>' are C++.",
+    tell: "C++ was created by Bjarne Stroustrup in the early 1980s and is widely used for systems software, game development, high-performance applications, and large-scale software.",
   },
   {
     language: "C++",
@@ -393,7 +396,7 @@ int main() {
 T max(T a, T b) {
     return a > b ? a : b;
 }`,
-    tell: "'template <typename T>' generic functions are C++.",
+    tell: "C++ was created by Bjarne Stroustrup in the early 1980s and is used for performance-critical software, engines, infrastructure, and general-purpose application development.",
   },
 
   {
@@ -401,12 +404,13 @@ T max(T a, T b) {
     category: ".NET",
     code: `using System;
 
+
 class Program {
     static void Main() {
         Console.WriteLine("Hello, world!");
     }
 }`,
-    tell: "'using System;' and 'Console.WriteLine' are C#.",
+    tell: "C# was designed by Anders Hejlsberg at Microsoft and released in 2000, and it is used for .NET desktop apps, web services, game development, and enterprise software.",
   },
   {
     language: "C#",
@@ -414,7 +418,7 @@ class Program {
     code: `var nums = new List<int> { 1, 2, 3 };
 var squares = nums.Select(n => n * n).ToList();
 foreach (var s in squares) Console.WriteLine(s);`,
-    tell: "LINQ-style '.Select(n => ...)' with 'var' and 'foreach' is C#.",
+    tell: "C# was created by Anders Hejlsberg at Microsoft and released in 2000, and it is widely used across the .NET ecosystem for apps, services, and games.",
   },
 
   {
@@ -425,8 +429,9 @@ foreach (var s in squares) Console.WriteLine(s);`,
     name: string;
 }
 
+
 const greet = (u: User): string => \`Hi, \${u.name}\`;`,
-    tell: "'interface' declarations and ': Type' annotations on parameters are TypeScript.",
+    tell: "TypeScript was created by Anders Hejlsberg at Microsoft and released in 2012, and it is used for large-scale JavaScript development, especially in web applications.",
   },
 
   {
@@ -438,19 +443,20 @@ const greet = (u: User): string => \`Hi, \${u.name}\`;`,
         println!("{}", n);
     }
 }`,
-    tell: "'fn', 'let', 'vec![...]', '&borrows', and 'println!' macro are Rust.",
+    tell: "Rust was created by Graydon Hoare at Mozilla and first released in 2010, and it is used for safe systems programming, performance-critical software, and tooling.",
   },
   {
     language: "Rust",
     category: "Systems",
     code: `struct Point { x: f64, y: f64 }
 
+
 impl Point {
     fn norm(&self) -> f64 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 }`,
-    tell: "'impl Type { fn method(&self) }' blocks are Rust.",
+    tell: "Rust was created by Graydon Hoare at Mozilla and first released in 2010, and it is popular for systems code, embedded work, web infrastructure, and security-sensitive software.",
   },
 
   {
@@ -460,8 +466,9 @@ impl Point {
 factorial 0 = 1
 factorial n = n * factorial (n - 1)
 
+
 main = print (factorial 10)`,
-    tell: "Type signatures with '::' and pattern-matched equations are Haskell.",
+    tell: "Haskell was standardized in 1990 by a committee of researchers and is used in functional programming, teaching, research, and correctness-focused software.",
   },
 
   {
@@ -470,9 +477,10 @@ main = print (factorial 10)`,
     code: `-module(hello).
 -export([greet/1]).
 
+
 greet(Name) ->
     io:format("Hello, ~s!~n", [Name]).`,
-    tell: "'-module(...).' attributes, '->' for clauses, and 'io:format' are Erlang.",
+    tell: "Erlang was created at Ericsson in the late 1980s by Joe Armstrong, Robert Virding, and Mike Williams, and it is used for telecom systems, distributed systems, and fault-tolerant services.",
   },
 
   {
@@ -484,8 +492,9 @@ greet(Name) ->
   end
 end
 
+
 Greeter.hello("world")`,
-    tell: "'defmodule ... do ... end' with 'IO.puts' and #{} interpolation is Elixir.",
+    tell: "Elixir was created by José Valim in 2011 and is used for scalable web applications, distributed systems, and high-concurrency services on the Erlang VM.",
   },
 
   {
@@ -495,22 +504,19 @@ Greeter.hello("world")`,
   if n <= 1 then 1
   else n * fact (n - 1)
 
+
 let () = Printf.printf "%d\\n" (fact 10)`,
-    tell: "'let rec', 'let () =', and 'Printf.printf' point to OCaml.",
+    tell: "OCaml grew out of the Caml family in the 1990s at INRIA and is used in compilers, formal methods, type-driven programming, and research software.",
   },
 
   {
     language: "F#",
     category: ".NET",
-    code: `let rec fact n =
-    if n <= 1 then 1
-    else n * fact (n - 1)
-
-[<EntryPoint>]
+    code: `[<EntryPoint>]
 let main argv =
     printfn "%d" (fact 10)
     0`,
-    tell: "'[<EntryPoint>]' attribute and 'printfn' make this F#.",
+    tell: "F# was created by Don Syme at Microsoft Research and released in the mid-2000s, and it is used for functional programming on .NET, data work, and business software.",
   },
 
   {
@@ -520,7 +526,7 @@ let main argv =
     val nums = listOf(1, 2, 3)
     nums.forEach { println("n = $it") }
 }`,
-    tell: "'fun', 'val', 'listOf', and '$it' inside string templates are Kotlin.",
+    tell: "Kotlin was created by JetBrains and first released in 2011, and it is used for Android apps, backend development, and modern JVM software.",
   },
 
   {
@@ -529,7 +535,7 @@ let main argv =
     code: `let nums = [1, 2, 3, 4, 5]
 let squares = nums.map { $0 * $0 }
 print(squares)`,
-    tell: "'let' with trailing closures using '$0' and 'print' are Swift.",
+    tell: "Swift was created by Apple and publicly introduced in 2014, and it is used for iOS, macOS, watchOS, and other Apple platform apps.",
   },
 
   {
@@ -539,7 +545,7 @@ print(squares)`,
   val nums = List(1, 2, 3)
   nums.map(_ * 2).foreach(println)
 }`,
-    tell: "'object ... extends App' and '_ * 2' shorthand are Scala.",
+    tell: "Scala was created by Martin Odersky and released in 2004, and it is used for JVM applications, backend services, and data engineering with tools like Spark.",
   },
 
   {
@@ -547,8 +553,9 @@ print(squares)`,
     category: "JVM",
     code: `(defn square [x] (* x x))
 
+
 (println (map square [1 2 3 4 5]))`,
-    tell: "'defn', square-bracket arg vectors '[x]', and Lisp parens are Clojure.",
+    tell: "Clojure was created by Rich Hickey and released in 2007, and it is used for functional programming on the JVM, especially in data-centric and concurrent systems.",
   },
 
   {
@@ -558,11 +565,12 @@ print(squares)`,
 use strict;
 use warnings;
 
+
 my @nums = (1, 2, 3);
 foreach my $n (@nums) {
     print "n = $n\\n";
 }`,
-    tell: "'my', '@arrays', '$scalars', and 'use strict;' are Perl.",
+    tell: "Perl was created by Larry Wall in 1987 and is used for text processing, system administration, web scripting, and rapid automation.",
   },
 
   {
@@ -574,7 +582,7 @@ foreach ($users as $u) {
     echo "Hello, $u\\n";
 }
 ?>`,
-    tell: "'<?php' tags, '$variables', and 'foreach ($x as $y)' are PHP.",
+    tell: "PHP was created by Rasmus Lerdorf in 1994 and is used heavily for server-side web development, especially dynamic websites and content platforms.",
   },
 
   {
@@ -583,7 +591,7 @@ foreach ($users as $u) {
     code: `nums <- c(1, 2, 3, 4, 5)
 squares <- sapply(nums, function(x) x^2)
 print(squares)`,
-    tell: "'<-' assignment, 'c(...)' vectors, and 'sapply' are R.",
+    tell: "R was created by Ross Ihaka and Robert Gentleman in the early 1990s and is used for statistics, data analysis, visualization, and research.",
   },
 
   {
@@ -593,10 +601,11 @@ print(squares)`,
     print("Hello, " .. name)
 end
 
+
 for i = 1, 3 do
     greet("world " .. i)
 end`,
-    tell: "'local', '..' string concatenation, and 'for i = 1, n do ... end' are Lua.",
+    tell: "Lua was created in the early 1990s by Roberto Ierusalimschy, Waldemar Celes, and Luiz Henrique de Figueiredo, and it is used for scripting, embedded systems, and game development.",
   },
 
   {
@@ -607,8 +616,9 @@ end`,
     s = sum(x.^2);
 end
 
+
 disp(sumSquares(10));`,
-    tell: "'1:n' ranges, '.^' element-wise power, and 'disp' are MATLAB.",
+    tell: "MATLAB was created by Cleve Moler in the late 1970s and is used for numerical computing, engineering, signal processing, and algorithm prototyping.",
   },
 
   {
@@ -618,8 +628,9 @@ disp(sumSquares(10));`,
     n < 2 ? n : fib(n-1) + fib(n-2)
 end
 
+
 println(fib(10))`,
-    tell: "'function ... end' with no 'def' and 'println' (one l) suggest Julia.",
+    tell: "Julia was created by Jeff Bezanson, Stefan Karpinski, Viral Shah, and Alan Edelman and first released in 2012, and it is used for scientific computing, data science, and high-performance numerics.",
   },
 
   {
@@ -631,7 +642,7 @@ println(fib(10))`,
     print('n = \$n');
   }
 }`,
-    tell: "'void main()', 'var', and 'print' (no .ln) with Dart-style strings are Dart.",
+    tell: "Dart was created by Google and first released in 2011, and it is used for cross-platform mobile apps, especially with Flutter, plus web and desktop apps.",
   },
 
   {
@@ -639,13 +650,14 @@ println(fib(10))`,
     category: "Mobile",
     code: `#import <Foundation/Foundation.h>
 
+
 int main(void) {
     @autoreleasepool {
         NSLog(@"Hello, %@!", @"world");
     }
     return 0;
 }`,
-    tell: "'@autoreleasepool', '@\"strings\"', and 'NSLog' mark Objective-C.",
+    tell: "Objective-C was created by Brad Cox and Tom Love in the early 1980s and was used for Apple platform development, especially before Swift became dominant.",
   },
 
   {
@@ -655,10 +667,11 @@ int main(void) {
     puts "Hello, $name"
 }
 
+
 foreach n {Alice Bob Carol} {
     greet $n
 }`,
-    tell: "'proc name {args} { ... }' and brace-quoted lists are Tcl.",
+    tell: "Tcl was created by John Ousterhout in the late 1980s and is used for scripting, testing, GUI tooling, and embedded automation.",
   },
 
   {
@@ -668,7 +681,7 @@ foreach n {Alice Bob Carol} {
 nums.each { n ->
     println "n = $n"
 }`,
-    tell: "'def' with closures '{ n -> ... }' and 'println' is Groovy (on the JVM).",
+    tell: "Groovy was created by James Strachan and Bob McWhirter and first released in 2003, and it is used for JVM scripting, build tools, and web development with Grails.",
   },
 
   {
@@ -677,9 +690,10 @@ nums.each { n ->
     code: `proc greet(name: string) =
   echo "Hello, ", name
 
+
 for n in @[1, 2, 3]:
   greet($n)`,
-    tell: "'proc name(arg: type) =', 'echo', and '@[...]' seq literals are Nim.",
+    tell: "Nim was created by Andreas Rumpf and first released in 2008, and it is used for systems programming, tooling, and fast, readable applications.",
   },
 
   {
@@ -687,10 +701,11 @@ for n in @[1, 2, 3]:
     category: "Systems",
     code: `const std = @import("std");
 
+
 pub fn main() void {
     std.debug.print("Hello, {s}!\\n", .{"world"});
 }`,
-    tell: "'@import', 'pub fn', and '.{...}' anonymous structs are Zig.",
+    tell: "Zig was created by Andrew Kelley in the mid-2010s and is used for systems programming, embedded software, and building reliable low-level tools.",
   },
 
   {
@@ -700,13 +715,15 @@ pub fn main() void {
   def initialize(@name : String)
   end
 
+
   def hello
     puts "Hello, #{@name}!"
   end
 end
 
+
 Greeter.new("world").hello`,
-    tell: "Ruby-like syntax but with explicit type annotations like ': String' is Crystal.",
+    tell: "Crystal was created by Ary Borenszweig and first released in 2014, and it is used for web applications, command-line tools, and Ruby-like productivity with static typing.",
   },
 
   {
@@ -718,7 +735,7 @@ Greeter.new("world").hello`,
         Console.WriteLine("Hello, " & name & "!")
     End Sub
 End Module`,
-    tell: "'Sub Main()', 'Dim x As Type', and 'End Sub' / 'End Module' are Visual Basic.",
+    tell: "Visual Basic was created by Microsoft in the early 1990s and is used for Windows applications, office automation, business tools, and .NET development.",
   },
 
   {
@@ -728,8 +745,9 @@ End Module`,
   repeat 4 [ forward :size right 90 ]
 end
 
+
 square 50`,
-    tell: "'to ... end' procedures and 'forward'/'right' turtle commands are Logo.",
+    tell: "Logo was developed in the late 1960s by Seymour Papert, Wally Feurzeig, and Cynthia Solomon, and it is used for education, especially teaching programming and geometry.",
   },
 
   {
@@ -739,6 +757,7 @@ square 50`,
     msg db "Hello, world!", 0Ah
     len equ $ - msg
 
+
 section .text
     global _start
 _start:
@@ -747,7 +766,7 @@ _start:
     mov rsi, msg
     mov rdx, len
     syscall`,
-    tell: "'section .data/.text', register names like 'rax/rdi', and 'syscall' are x86-64 assembly (NASM).",
+    tell: "Assembly language emerged in the early days of computing and is used for operating-system internals, embedded work, reverse engineering, and performance-critical code.",
   },
   {
     language: "Assembly",
@@ -760,7 +779,7 @@ _start:
     jmp loop
 done:
     ret`,
-    tell: "Labels followed by ':' plus mnemonics like cmp/je/jmp/dec/ret are assembly.",
+    tell: "Assembly language emerged in the early days of computing and is used for hardware-near programming, debugging, optimization, and understanding machine behavior.",
   },
 
   {
@@ -769,16 +788,18 @@ done:
     code: `library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+
 entity AND_GATE is
     port (A, B : in  STD_LOGIC;
           Y    : out STD_LOGIC);
 end AND_GATE;
 
+
 architecture Behavioral of AND_GATE is
 begin
     Y <= A and B;
 end Behavioral;`,
-    tell: "'entity ... port (...)' paired with 'architecture ... of ... is' and 'STD_LOGIC' are VHDL.",
+    tell: "VHDL was created in the 1980s under U.S. Department of Defense and IEEE efforts and is used for digital hardware design, FPGA development, and chip verification.",
   },
 
   {
@@ -790,7 +811,7 @@ end Behavioral;`,
         Сообщить("Итерация: " + Сч);
     КонецЦикла;
 КонецПроцедуры`,
-    tell: "Cyrillic keywords like 'Процедура/КонецПроцедуры' and 'Для ... Цикл' are 1C:Enterprise.",
+    tell: "1C:Enterprise was created by the Russian company 1C in the 1990s and is used for business automation, accounting, ERP systems, and enterprise management.",
   },
 
   {
@@ -798,12 +819,14 @@ end Behavioral;`,
     category: "Country-specific",
     code: `.版本 2
 
+
 .程序集 程序集1
+
 
 .子程序 _启动子程序, 整数型, , 本子程序在程序启动后最先执行
     信息框 ("你好，世界！", 0, )
     返回 (0)`,
-    tell: "Chinese keywords like '.版本', '.程序集', '.子程序' and '信息框' are 易语言 (Easy Programming Language).",
+    tell: "易语言, or Easy Programming Language, was created in China in the late 1990s and is used for Windows software development and Chinese-language programming education.",
   },
 
   {
@@ -812,11 +835,12 @@ end Behavioral;`,
     code: `âge :: nombre vaut 25
 message :: mot vaut "Bonjour"
 
+
 Saluer:
     début
     affiche message + ", tu as " + âge + " ans!"
     fin`,
-    tell: "French keywords 'vaut', 'début', 'affiche', 'fin' with '::' typed declarations are Linotte.",
+    tell: "Linotte was created in the 2000s by Jean-François Savornin and is designed for French-speaking beginners, education, and simple scripting.",
   },
 
   {
@@ -824,9 +848,10 @@ Saluer:
     category: "Country-specific",
     code: `(عرّف مربع (دالة (س) (* س س)))
 
+
 (قول (مربع ٥))
 (قول "مرحبا، يا عالم!")`,
-    tell: "Lisp-style parentheses with Arabic identifiers like 'عرّف', 'دالة', 'قول' are قلب (Qalb).",
+    tell: "قلب, also called Qalb, was developed in 2012 by Ramsey Nasser and is an artistic, Arabic-language functional language meant to challenge English-only programming norms.",
   },
 
   {
@@ -834,9 +859,10 @@ Saluer:
     category: "Array languages",
     code: `Avg ← ÷⧻⟜/+
 
+
 &p Avg [1 2 3 4 5]
 &p ⇌ "racecar"`,
-    tell: "Glyphs like '÷⧻⟜/+', '←' assignment, '&p' print, and '⇌' reverse are Uiua (stack-based array language).",
+    tell: "Uiua was created by Kai Schmidt in the 2020s and is used for general-purpose array programming, concise mathematical work, and experimental tacit coding.",
   },
 
   {
@@ -846,14 +872,14 @@ Saluer:
 I HAS A NAME ITZ "WORLD"
 VISIBLE "HAI " AN NAME
 KTHXBYE`,
-    tell: "'HAI 1.2', 'I HAS A ... ITZ', 'VISIBLE', and 'KTHXBYE' are LOLCODE.",
+    tell: "LOLCODE emerged in the mid-2000s as an internet joke language, and it is used mainly for humor, education, and playful demonstrations of language design.",
   },
 
   {
     language: "Befunge",
     category: "Esoteric",
     code: `"!dlroW ,olleH">:#,_@`,
-    tell: "A single line with a reversed string and the control sequence '>:#,_@' is 2D Befunge.",
+    tell: "Befunge was created by Chris Pressey in 1993 and is used mostly for programming puzzles, language research, and demonstrating two-dimensional control flow.",
   },
 
   {
@@ -864,7 +890,7 @@ PLEASE DO ,1 SUB #1 <- #238
 PLEASE DO ,1 SUB #2 <- #112
 PLEASE READ OUT ,1
 PLEASE GIVE UP`,
-    tell: "'PLEASE DO', '#numbers', 'SUB', and 'GIVE UP' are INTERCAL's polite commands.",
+    tell: "INTERCAL was created in 1972 by Don Woods and James M. Lyon as a parody language, and it is used mainly for humor and programming-language curiosities.",
   },
 
   {
@@ -873,9 +899,10 @@ PLEASE GIVE UP`,
     code: `fact[0] := 1
 fact[n_] := n * fact[n - 1]
 
+
 Print[fact /@ Range[6]]
 Plot[Sin[x] Exp[-x/5], {x, 0, 2 Pi}]`,
-    tell: "Square brackets for calls 'f[x]', ':=' SetDelayed, '_' patterns, and '/@' Map are Wolfram Language.",
+    tell: "Wolfram Language was created by Stephen Wolfram and first appeared in 1988, and it is used for symbolic computation, mathematics, data science, and technical computing.",
   },
 
   {
@@ -883,8 +910,9 @@ Plot[Sin[x] Exp[-x/5], {x, 0, 2 Pi}]`,
     category: "Array languages",
     code: `Avg ← +´÷≠
 
+
 •Show Avg 1‿2‿3‿4‿5
 •Show ⌽ "racecar"`,
-    tell: "Glyphs like '+´÷≠', '←' assignment, '‿' strand separator, and '•Show' are BQN (a modern APL successor).",
+    tell: "BQN was created by Marshall Lochbaum in the 2020s as a modern APL descendant, and it is used for array programming, mathematical work, and concise algorithmic code.",
   },
 ];
