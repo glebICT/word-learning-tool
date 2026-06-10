@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Symbol Hunt</title>
+    <style>
+      :root {
+        --bg: #0e1116;
+        --panel: #171c24;
+        --cell: #1f2630;
+        --cell-hover: #2b3543;
+        --found: #1f6f43;
+        --found-glow: #2ee27a;
+        --wrong: #7a1f2b;
+        --text: #e6edf3;
+        --muted: #8b97a7;
+        --accent: #4ea1ff;
+        --border: #2a3441;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+      }
+
+      body {
+        background: radial-gradient(1200px 600px at 50% -10%, #1a2230, var(--bg));
+        color: var(--text);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100%;
+        padding: 24px 16px 48px;
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 28px;
+        letter-spacing: 0.5px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        margin: 0 0 20px;
+        font-size: 14px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 20px;
+        width: 100%;
+        max-width: 560px;
+      }
+
+      /* ---- Level select ---- */
+      .levels {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .level-btn {
+        flex: 1 1 140px;
+        background: var(--cell);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        padding: 18px 12px;
+        cursor: pointer;
+        transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+        text-align: center;
+      }
+      .level-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+        background: var(--cell-hover);
+      }
+      .level-btn .big {
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .level-btn .small {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      /* ---- HUD ---- */
+      .hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+      .hud .stat {
+        background: var(--cell);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 14px;
+        text-align: center;
+        min-width: 92px;
+      }
+      .hud .stat .label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .hud .stat .value {
+        font-size: 22px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      #timer.value { color: var(--accent); }
+      #timer.low { color: #ff6b6b; }
+
+      /* ---- Targets (highlighted find tray, visually distinct from grid) ---- */
+      .targets {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin-bottom: 16px;
+        padding: 12px 0;
+        background: linear-gradient(180deg, rgba(78, 161, 255, 0.14), rgba(78, 161, 255, 0.05));
+        border-radius: 12px;
+      }
+      #targets-list {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        gap: 10px;
+        justify-content: space-evenly;
+      }
+      .target {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 6px;
+        background: var(--cell);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        transition: all 0.2s ease;
+      }
+      .target .sym {
+        font-size: 26px;
+        line-height: 1;
+      }
+      .target .check {
+        font-size: 20px;
+        line-height: 1;
+        color: var(--muted);
+      }
+      .target.done {
+        background: var(--found);
+        border-color: var(--found-glow);
+        color: #fff;
+      }
+      .target.done .check { color: var(--found-glow); }
+
+      /* ---- Grid ---- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 4px;
+        user-select: none;
+      }
+      .gcell {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--cell);
+        border: 1px solid transparent;
+        border-radius: 7px;
+        font-size: clamp(14px, 4.2vw, 22px);
+        cursor: pointer;
+        transition: background 0.1s ease, transform 0.08s ease;
+      }
+      .gcell:hover { background: var(--cell-hover); }
+      .gcell:active { transform: scale(0.92); }
+      .gcell.found {
+        background: var(--found);
+        color: #fff;
+        cursor: default;
+        animation: pop 0.25s ease;
+      }
+      .gcell.wrong {
+        animation: shake 0.3s ease;
+        background: var(--wrong);
+      }
+      @keyframes pop {
+        0% { transform: scale(0.7); }
+        60% { transform: scale(1.12); }
+        100% { transform: scale(1); }
+      }
+      @keyframes shake {
+        0%,100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+      }
+
+      /* ---- Controls ---- */
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        justify-content: center;
+      }
+      button.btn {
+        background: var(--cell);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.12s ease, border-color 0.12s ease;
+      }
+      button.btn:hover { background: var(--cell-hover); border-color: var(--accent); }
+      button.btn.primary { background: var(--accent); color: #06121f; border-color: var(--accent); font-weight: 600; }
+
+      /* ---- Overlay ---- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 11, 16, 0.82);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        backdrop-filter: blur(3px);
+      }
+      .overlay .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 30px 34px;
+        text-align: center;
+        max-width: 360px;
+      }
+      .overlay h2 { margin: 0 0 8px; font-size: 26px; }
+      .overlay p { color: var(--muted); margin: 6px 0 20px; }
+      .overlay .result-emoji { font-size: 48px; }
+      .hidden { display: none !important; }
+
+      a.home {
+        color: var(--muted);
+        font-size: 13px;
+        text-decoration: none;
+        margin-top: 22px;
+      }
+      a.home:hover { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 Symbol Hunt</h1>
+    <p class="subtitle">Find every target symbol hidden in the 10×10 grid before time runs out.</p>
+
+    <!-- Level select -->
+    <div id="menu" class="panel">
+      <div class="levels">
+        <button class="level-btn" data-level="3">
+          <div class="big">3</div>
+          <div class="small">symbols · 45s · Easy</div>
+        </button>
+        <button class="level-btn" data-level="5">
+          <div class="big">5</div>
+          <div class="small">symbols · 60s · Medium</div>
+        </button>
+        <button class="level-btn" data-level="10">
+          <div class="big">10</div>
+          <div class="small">symbols · 90s · Hard</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Game -->
+    <div id="game" class="panel hidden">
+      <div class="hud">
+        <div class="stat">
+          <div class="label">Time</div>
+          <div id="timer" class="value">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Found</div>
+          <div id="found-count" class="value">0/0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Misses</div>
+          <div id="miss-count" class="value">0</div>
+        </div>
+      </div>
+
+      <div class="targets">
+        <span id="targets-list"></span>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <div class="controls">
+        <button class="btn" id="quit-btn">Menu</button>
+        <button class="btn" id="restart-btn">Restart</button>
+      </div>
+    </div>
+
+    <!-- End overlay -->
+    <div id="overlay" class="overlay hidden">
+      <div class="card">
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <h2 id="result-title">You win!</h2>
+        <p id="result-text"></p>
+        <div class="controls">
+          <button class="btn primary" id="play-again-btn">Play again</button>
+          <button class="btn" id="menu-btn">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <a class="home" href="../">← Back to all games</a>
+
+    <script>
+      // A varied pool of distinct, easily-rendered UTF-8 symbols.
+      const SYMBOL_POOL = [
+        "★","☆","✦","✧","✪","✫","✬","✭","✮","✯","❀","❁","✿","❂","❃","❄","❅","❆",
+        "♠","♣","♥","♦","♤","♧","♡","♢","♔","♕","♖","♗","♘","♙","♚","♛",
+        "☀","☁","☂","☃","☄","☼","☾","☽","♨","✈","⚓","⚑","⚐","⌛","⌚",
+        "☯","☮","♻","⚛","⚜","✠","✚","✜","✝","☥","☦","☧","✡","✦",
+        "➤","➢","➣","➔","➜","➝","➞","➟","➠","➡","⬆","⬇","⬅","⬈","⬉",
+        "■","□","▲","△","▼","▽","◆","◇","○","●","◐","◑","◒","◓","◢","◣","◤","◥",
+        "♩","♪","♫","♬","♭","♮","♯","☎","✆","✉","✂","✏","✒","✓","✔","✕","✖",
+        "α","β","γ","δ","ε","ζ","η","θ","λ","μ","π","σ","φ","ψ","ω","Ω","Σ","Δ",
+        "☘","✤","✥","✦","✧","❉","❊","❋","✱","✲","✳","✴","✵","✶","✷","✸","✹","✺",
+        "⚀","⚁","⚂","⚃","⚄","⚅","♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓",
+      ];
+
+      const LEVELS = {
+        3:  { count: 3,  time: 45 },
+        5:  { count: 5,  time: 60 },
+        10: { count: 10, time: 90 },
+      };
+
+      const GRID_SIZE = 10;
+      const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
+
+      const els = {
+        menu: document.getElementById("menu"),
+        game: document.getElementById("game"),
+        overlay: document.getElementById("overlay"),
+        grid: document.getElementById("grid"),
+        timer: document.getElementById("timer"),
+        foundCount: document.getElementById("found-count"),
+        missCount: document.getElementById("miss-count"),
+        targetsList: document.getElementById("targets-list"),
+        resultEmoji: document.getElementById("result-emoji"),
+        resultTitle: document.getElementById("result-title"),
+        resultText: document.getElementById("result-text"),
+      };
+
+      let state = null;
+      let tickHandle = null;
+
+      function uniqueSample(arr, n) {
+        const pool = [...new Set(arr)];
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        return pool.slice(0, n);
+      }
+
+      function startGame(levelKey) {
+        const level = LEVELS[levelKey];
+
+        // Pick the target symbols, then fill the rest of the grid with distinct
+        // distractors so that EVERY cell in the grid is a unique symbol — no
+        // symbol (target or not) ever appears twice.
+        const targets = uniqueSample(SYMBOL_POOL, level.count);
+        const targetSet = new Set(targets);
+        const distractors = uniqueSample(
+          SYMBOL_POOL.filter((s) => !targetSet.has(s)),
+          TOTAL_CELLS - targets.length
+        );
+
+        // One unique symbol per cell: targets + distractors, then shuffled.
+        const cells = [...targets, ...distractors];
+        for (let i = cells.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [cells[i], cells[j]] = [cells[j], cells[i]];
+        }
+
+        const targetCounts = {};
+        targets.forEach((sym) => {
+          targetCounts[sym] = 1;
+        });
+
+        state = {
+          levelKey,
+          targets,
+          targetSet,
+          remaining: { ...targetCounts },
+          totalToFind: Object.values(targetCounts).reduce((a, b) => a + b, 0),
+          found: 0,
+          misses: 0,
+          timeLeft: level.time,
+          over: false,
+        };
+
+        renderGrid(cells);
+        renderTargets();
+        updateHud();
+
+        els.menu.classList.add("hidden");
+        els.overlay.classList.add("hidden");
+        els.game.classList.remove("hidden");
+
+        clearInterval(tickHandle);
+        tickHandle = setInterval(tick, 1000);
+      }
+
+      function renderGrid(cells) {
+        els.grid.innerHTML = "";
+        cells.forEach((sym) => {
+          const cell = document.createElement("div");
+          cell.className = "gcell";
+          cell.textContent = sym;
+          cell.dataset.sym = sym;
+          cell.addEventListener("click", onCellClick);
+          els.grid.appendChild(cell);
+        });
+      }
+
+      function renderTargets() {
+        els.targetsList.innerHTML = "";
+        state.targets.forEach((sym) => {
+          const t = document.createElement("span");
+          t.className = "target";
+          t.dataset.sym = sym;
+
+          const symEl = document.createElement("span");
+          symEl.className = "sym";
+          symEl.textContent = sym;
+
+          const checkEl = document.createElement("span");
+          checkEl.className = "check";
+          checkEl.textContent = "☐";
+
+          t.appendChild(symEl);
+          t.appendChild(checkEl);
+          els.targetsList.appendChild(t);
+        });
+      }
+
+      function onCellClick(e) {
+        if (state.over) return;
+        const cell = e.currentTarget;
+        if (cell.classList.contains("found")) return;
+        const sym = cell.dataset.sym;
+
+        if (state.targetSet.has(sym)) {
+          cell.classList.add("found");
+          cell.removeEventListener("click", onCellClick);
+          state.found++;
+          state.remaining[sym]--;
+          if (state.remaining[sym] === 0) {
+            // Mark this target as fully cleared: tick its checkbox.
+            const badge = els.targetsList.querySelector(
+              `.target[data-sym="${cssEscape(sym)}"]`
+            );
+            if (badge) {
+              badge.classList.add("done");
+              const check = badge.querySelector(".check");
+              if (check) check.textContent = "☑";
+            }
+          }
+          updateHud();
+          if (state.found >= state.totalToFind) endGame(true);
+        } else {
+          state.misses++;
+          updateHud();
+          cell.classList.add("wrong");
+          setTimeout(() => cell.classList.remove("wrong"), 300);
+        }
+      }
+
+      function cssEscape(s) {
+        if (window.CSS && CSS.escape) return CSS.escape(s);
+        return s.replace(/["\\]/g, "\\$&");
+      }
+
+      function tick() {
+        state.timeLeft--;
+        updateHud();
+        if (state.timeLeft <= 0) endGame(false);
+      }
+
+      function updateHud() {
+        els.timer.textContent = state.timeLeft;
+        els.timer.classList.toggle("low", state.timeLeft <= 10);
+        els.foundCount.textContent = `${state.found}/${state.totalToFind}`;
+        els.missCount.textContent = state.misses;
+      }
+
+      function endGame(won) {
+        state.over = true;
+        clearInterval(tickHandle);
+
+        if (won) {
+          els.resultEmoji.textContent = "🎉";
+          els.resultTitle.textContent = "You found them all!";
+          els.resultText.textContent =
+            `Cleared with ${state.timeLeft}s to spare · ${state.misses} miss${state.misses === 1 ? "" : "es"}.`;
+          // Pop a native alert when every symbol is guessed right.
+          setTimeout(() => {
+            alert(
+              `🎉 You found all ${state.targets.length} symbols!\n` +
+              `Time left: ${state.timeLeft}s · Misses: ${state.misses}`
+            );
+          }, 50);
+        } else {
+          els.resultEmoji.textContent = "⏰";
+          els.resultTitle.textContent = "Time's up!";
+          els.resultText.textContent =
+            `You found ${state.found} of ${state.totalToFind}. Try again?`;
+        }
+        els.overlay.classList.remove("hidden");
+      }
+
+      function toMenu() {
+        clearInterval(tickHandle);
+        if (state) state.over = true;
+        els.overlay.classList.add("hidden");
+        els.game.classList.add("hidden");
+        els.menu.classList.remove("hidden");
+      }
+
+      // Wire up controls.
+      document.querySelectorAll(".level-btn").forEach((btn) => {
+        btn.addEventListener("click", () => startGame(btn.dataset.level));
+      });
+      document.getElementById("quit-btn").addEventListener("click", toMenu);
+      document.getElementById("menu-btn").addEventListener("click", toMenu);
+      document.getElementById("restart-btn").addEventListener("click", () => {
+        if (state) startGame(state.levelKey);
+      });
+      document.getElementById("play-again-btn").addEventListener("click", () => {
+        if (state) startGame(state.levelKey);
+      });
+    </script>
+  </body>
+</html>
