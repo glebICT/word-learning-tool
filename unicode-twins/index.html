@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unicode Twins</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Comfortaa:wght@500&family=Lobster&family=Noto+Sans+Armenian&family=Noto+Sans+Georgian&family=Noto+Serif:ital@0;1&family=Noto+Serif+Georgian&family=Playfair+Display:ital@1&family=Press+Start+2P&family=Roboto+Mono&family=UnifrakturMaguntia&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --panel: #fffdf8;
+        --cell: #ffffff;
+        --cell-hover: #f0ece2;
+        --text: #1d1b16;
+        --muted: #6b665b;
+        --border: #d9d3c5;
+        --accent: #3056d3;
+        --accent-soft: #dfe6fb;
+        --good: #1b7a45;
+        --good-soft: #d6f1e0;
+        --bad: #b3261e;
+        --bad-soft: #f9dcd9;
+        --miss: #b56a00;
+        --miss-soft: #fbead0;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #111318;
+          --panel: #1a1d24;
+          --cell: #22262f;
+          --cell-hover: #2c313c;
+          --text: #e9e6df;
+          --muted: #9a968c;
+          --border: #343a46;
+          --accent: #7d9bff;
+          --accent-soft: #26304d;
+          --good: #4fd18b;
+          --good-soft: #173826;
+          --bad: #ff7a70;
+          --bad-soft: #3d1c1a;
+          --miss: #f0a93b;
+          --miss-soft: #3a2a12;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #111318;
+        --panel: #1a1d24;
+        --cell: #22262f;
+        --cell-hover: #2c313c;
+        --text: #e9e6df;
+        --muted: #9a968c;
+        --border: #343a46;
+        --accent: #7d9bff;
+        --accent-soft: #26304d;
+        --good: #4fd18b;
+        --good-soft: #173826;
+        --bad: #ff7a70;
+        --bad-soft: #3d1c1a;
+        --miss: #f0a93b;
+        --miss-soft: #3a2a12;
+      }
+
+      * { box-sizing: border-box; }
+      html { color-scheme: light dark; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        padding: 24px 16px 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 { margin: 0 0 4px; font-size: 28px; }
+      .subtitle { color: var(--muted); margin: 0 0 20px; font-size: 15px; text-align: center; max-width: 560px; }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+        width: 100%;
+        max-width: 620px;
+      }
+      .hidden { display: none !important; }
+      button { font: inherit; cursor: pointer; }
+
+      /* ---- Menu ---- */
+      .levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+      .level-btn {
+        text-align: left;
+        background: var(--cell);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 4px 12px;
+        align-items: center;
+        transition: border-color 0.12s, transform 0.12s;
+      }
+      .level-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .level-btn .sample { grid-row: span 3; font-size: 36px; text-align: center; font-family: "Noto Serif", "Noto Serif Georgian", serif; }
+      .level-btn .name { font-weight: 700; }
+      .level-btn .desc { color: var(--muted); font-size: 13px; }
+      .level-btn .best { color: var(--accent); font-size: 12px; font-weight: 600; }
+      .howto { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 16px 0 0; }
+
+      /* ---- Game ---- */
+      .hud { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+      .stat { background: var(--cell); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; text-align: center; }
+      .stat .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+      .stat .value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .hud .spacer { flex: 1; }
+      .ghost { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; }
+      .ghost:hover { color: var(--text); border-color: var(--text); }
+
+      .target-row { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+      .target {
+        width: 96px; height: 96px; flex: none;
+        display: grid; place-items: center;
+        font-size: 60px; line-height: 1;
+        background: var(--accent-soft);
+        border: 2px solid var(--accent);
+        border-radius: 14px;
+        font-family: "Noto Serif", "Noto Serif Georgian", "Noto Sans Armenian", serif;
+      }
+      .task { font-size: 15px; line-height: 1.45; }
+      .task strong { color: var(--accent); }
+
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .cell {
+        aspect-ratio: 1;
+        background: var(--cell);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        display: grid; place-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+        transition: background 0.1s, border-color 0.1s;
+      }
+      .cell:hover:not(:disabled) { background: var(--cell-hover); }
+      .cell .glyph { font-size: clamp(30px, 9vw, 52px); line-height: 1; display: inline-block; }
+      .cell.selected { border-color: var(--accent); background: var(--accent-soft); }
+      .cell.correct { border-color: var(--good); background: var(--good-soft); }
+      .cell.wrong { border-color: var(--bad); background: var(--bad-soft); }
+      .cell.missed { border-color: var(--miss); border-style: dashed; background: var(--miss-soft); }
+      .cell .code {
+        position: absolute; bottom: 4px; left: 0; right: 0;
+        font: 600 10px ui-monospace, "Roboto Mono", monospace;
+        color: var(--muted);
+      }
+      .cell:disabled { cursor: default; }
+
+      .spin { animation: spin var(--dur, 6s) linear infinite; animation-direction: var(--dir, normal); }
+      @keyframes spin {
+        from { transform: rotate(var(--start, 0deg)); }
+        to { transform: rotate(calc(var(--start, 0deg) + 360deg)); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin { animation: none; transform: rotate(var(--start, 0deg)); }
+      }
+
+      .actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 14px; }
+      .actions .msg { flex: 1; font-size: 15px; font-weight: 600; }
+      .primary { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 22px; font-weight: 600; }
+      .primary:disabled { opacity: 0.5; cursor: default; }
+
+      .reveal { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+      .reveal h3 { margin: 0 0 8px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+      .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+      .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; border: 2px solid; vertical-align: -1px; }
+      .legend .l-good::before { border-color: var(--good); background: var(--good-soft); }
+      .legend .l-bad::before { border-color: var(--bad); background: var(--bad-soft); }
+      .legend .l-miss::before { border-color: var(--miss); border-style: dashed; background: var(--miss-soft); }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+      td.g { font-size: 26px; width: 44px; text-align: center; font-family: "Noto Serif", "Noto Serif Georgian", "Noto Sans Armenian", serif; }
+      td.cp { font-family: ui-monospace, "Roboto Mono", monospace; white-space: nowrap; }
+      td.blk { color: var(--muted); }
+      .uname { font-weight: 600; font-size: 12px; letter-spacing: 0.2px; }
+      .explain { color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 2px; font-weight: 400; }
+      tr.is-target td { font-weight: 700; color: var(--accent); }
+
+      /* ---- Result ---- */
+      .result { text-align: center; }
+      .result .big { font-size: 56px; font-weight: 800; color: var(--accent); margin: 8px 0; }
+      .result p { color: var(--muted); }
+      .result .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+
+      @media (max-width: 480px) {
+        .grid { gap: 6px; }
+        .target { width: 76px; height: 76px; font-size: 46px; }
+        td.blk { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Unicode Twins</h1>
+    <p class="subtitle">Find every copy of the target character. Some of the others only look like it.</p>
+
+    <!-- Menu -->
+    <section id="menu" class="panel">
+      <div class="levels" id="levels"></div>
+      <p class="howto">
+        Each level has 8 rounds. Select every tile holding <em>exactly the same Unicode character</em> as the target, then press
+        <strong>Check</strong>. +1 for each correct pick, −1 for each wrong one, +2 bonus for a perfect round.
+        After each round you'll see the code point behind every tile.
+      </p>
+    </section>
+
+    <!-- Game -->
+    <section id="game" class="panel hidden">
+      <div class="hud">
+        <div class="stat"><div class="label">Level</div><div class="value" id="hud-level">1</div></div>
+        <div class="stat"><div class="label">Round</div><div class="value" id="hud-round">1/8</div></div>
+        <div class="stat"><div class="label">Score</div><div class="value" id="hud-score">0</div></div>
+        <div class="spacer"></div>
+        <button class="ghost" id="btn-menu">Levels</button>
+      </div>
+
+      <div class="target-row">
+        <div class="target" id="target"></div>
+        <div class="task" id="task"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="actions">
+        <div class="msg" id="msg"></div>
+        <button class="primary" id="btn-check">Check</button>
+        <button class="primary hidden" id="btn-next">Next round</button>
+      </div>
+
+      <div class="reveal hidden" id="reveal">
+        <div class="legend">
+          <span class="l-good">correct pick</span>
+          <span class="l-bad">wrong pick (lookalike)</span>
+          <span class="l-miss">missed twin</span>
+        </div>
+        <h3>Characters in this round</h3>
+        <table><tbody id="reveal-table"></tbody></table>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section id="result" class="panel result hidden">
+      <h2 id="res-title">Level complete</h2>
+      <div class="big" id="res-score">0</div>
+      <p id="res-detail"></p>
+      <div class="row">
+        <button class="ghost" id="res-menu">Levels</button>
+        <button class="primary" id="res-retry">Play again</button>
+        <button class="primary" id="res-next">Next level</button>
+      </div>
+    </section>
+
+    <script>
+      // ---------- Data ----------
+      const NAMES = {"#":"NUMBER SIGN","$":"DOLLAR SIGN","%":"PERCENT SIGN","&":"AMPERSAND","3":"DIGIT THREE","6":"DIGIT SIX","?":"QUESTION MARK","@":"COMMERCIAL AT","A":"LATIN CAPITAL LETTER A","G":"LATIN CAPITAL LETTER G","Q":"LATIN CAPITAL LETTER Q","R":"LATIN CAPITAL LETTER R","a":"LATIN SMALL LETTER A","c":"LATIN SMALL LETTER C","g":"LATIN SMALL LETTER G","k":"LATIN SMALL LETTER K","n":"LATIN SMALL LETTER N","p":"LATIN SMALL LETTER P","u":"LATIN SMALL LETTER U","w":"LATIN SMALL LETTER W","x":"LATIN SMALL LETTER X","y":"LATIN SMALL LETTER Y","¢":"CENT SIGN","£":"POUND SIGN","¥":"YEN SIGN","§":"SECTION SIGN","¶":"PILCROW SIGN","×":"MULTIPLICATION SIGN","ß":"LATIN SMALL LETTER SHARP S","ç":"LATIN SMALL LETTER C WITH CEDILLA","ø":"LATIN SMALL LETTER O WITH STROKE","þ":"LATIN SMALL LETTER THORN","ŋ":"LATIN SMALL LETTER ENG","ſ":"LATIN SMALL LETTER LONG S","ƃ":"LATIN SMALL LETTER B WITH TOPBAR","ƅ":"LATIN SMALL LETTER TONE SIX","ƒ":"LATIN SMALL LETTER F WITH HOOK","ƞ":"LATIN SMALL LETTER N WITH LONG RIGHT LEG","Ʒ":"LATIN CAPITAL LETTER EZH","ƿ":"LATIN LETTER WYNN","ȝ":"LATIN SMALL LETTER YOGH","ɕ":"LATIN SMALL LETTER C WITH CURL","ɜ":"LATIN SMALL LETTER REVERSED OPEN E","ɯ":"LATIN SMALL LETTER TURNED M","ɷ":"LATIN SMALL LETTER CLOSED OMEGA","ʃ":"LATIN SMALL LETTER ESH","ʆ":"LATIN SMALL LETTER ESH WITH CURL","ʊ":"LATIN SMALL LETTER UPSILON","ʋ":"LATIN SMALL LETTER V WITH HOOK","ʒ":"LATIN SMALL LETTER EZH","ʘ":"LATIN LETTER BILABIAL CLICK","Δ":"GREEK CAPITAL LETTER DELTA","Θ":"GREEK CAPITAL LETTER THETA","Λ":"GREEK CAPITAL LETTER LAMDA","Π":"GREEK CAPITAL LETTER PI","Φ":"GREEK CAPITAL LETTER PHI","ε":"GREEK SMALL LETTER EPSILON","η":"GREEK SMALL LETTER ETA","ν":"GREEK SMALL LETTER NU","ρ":"GREEK SMALL LETTER RHO","ς":"GREEK SMALL LETTER FINAL SIGMA","υ":"GREEK SMALL LETTER UPSILON","φ":"GREEK SMALL LETTER PHI","χ":"GREEK SMALL LETTER CHI","ω":"GREEK SMALL LETTER OMEGA","ϕ":"GREEK PHI SYMBOL","ϖ":"GREEK PI SYMBOL","ϛ":"GREEK SMALL LETTER STIGMA","Д":"CYRILLIC CAPITAL LETTER DE","З":"CYRILLIC CAPITAL LETTER ZE","б":"CYRILLIC SMALL LETTER BE","з":"CYRILLIC SMALL LETTER ZE","п":"CYRILLIC SMALL LETTER PE","ф":"CYRILLIC SMALL LETTER EF","ь":"CYRILLIC SMALL LETTER SOFT SIGN","є":"CYRILLIC SMALL LETTER UKRAINIAN IE","ѵ":"CYRILLIC SMALL LETTER IZHITSA","ҏ":"CYRILLIC SMALL LETTER ER WITH TICK","Ө":"CYRILLIC CAPITAL LETTER BARRED O","Ո":"ARMENIAN CAPITAL LETTER VO","ռ":"ARMENIAN SMALL LETTER RA","ვ":"GEORGIAN LETTER VIN","ო":"GEORGIAN LETTER ON","€":"EURO SIGN","∅":"EMPTY SET","∈":"ELEMENT OF","∏":"N-ARY PRODUCT","∞":"INFINITY","∩":"INTERSECTION","∫":"INTEGRAL","⊓":"SQUARE CAP","⊕":"CIRCLED PLUS","⊙":"CIRCLED DOT OPERATOR","⌘":"PLACE OF INTEREST SIGN","△":"WHITE UP-POINTING TRIANGLE","☂":"UMBRELLA","☃":"SNOWMAN","★":"BLACK STAR","☎":"BLACK TELEPHONE","☘":"SHAMROCK","☮":"PEACE SYMBOL","☯":"YIN YANG","☾":"LAST QUARTER MOON","♛":"BLACK CHESS QUEEN","♞":"BLACK CHESS KNIGHT","♠":"BLACK SPADE SUIT","♣":"BLACK CLUB SUIT","♥":"BLACK HEART SUIT","♦":"BLACK DIAMOND SUIT","♪":"EIGHTH NOTE","♫":"BEAMED EIGHTH NOTES","♻":"BLACK UNIVERSAL RECYCLING SYMBOL","⚘":"FLOWER","✂":"BLACK SCISSORS","✈":"AIRPLANE","✉":"ENVELOPE","✕":"MULTIPLICATION X","✦":"BLACK FOUR POINTED STAR","✿":"BLACK FLORETTE","ㄨ":"BOPOMOFO LETTER U"};
+
+      // Short, student-friendly explanation of what each character is and where it's used.
+      const EXPLAIN = {
+        // Level 1 – easy symbols
+        "★": "A filled five-pointed star, used for ratings and highlights.",
+        "♥": "The heart suit from playing cards; also used to mean love.",
+        "♠": "The spade suit from playing cards.",
+        "♣": "The club suit from playing cards.",
+        "♦": "The diamond suit from playing cards.",
+        "♪": "A single eighth note in music notation.",
+        "♫": "Two eighth notes joined by a beam; often means “music”.",
+        "☂": "An umbrella, as used on weather maps.",
+        "✈": "An airplane, as used on airport signs.",
+        "☯": "Yin and yang, a Chinese symbol for balanced opposites.",
+        "✿": "A decorative flower (florette) from the Dingbats block.",
+        "☘": "A shamrock, the three-leaf clover that symbolises Ireland.",
+        "☃": "A snowman, as used in weather forecasts.",
+        "✂": "Scissors; on forms it marks a “cut here” line.",
+        "✉": "An envelope, meaning mail or e-mail.",
+        "♞": "The black knight from chess notation.",
+        "☎": "An old desk telephone, meaning “phone number”.",
+        "☾": "A crescent moon (last quarter).",
+        "♛": "The black queen from chess notation.",
+        "✦": "A four-pointed star, often used for sparkle or decoration.",
+        "⌘": "The “place of interest” sign from Scandinavian road signs; now the Command key on Mac keyboards.",
+        "☮": "The peace symbol, designed in 1958 for nuclear disarmament campaigns.",
+        "♻": "The universal recycling symbol.",
+        "⚘": "A flower on a stem.",
+        "∞": "Infinity, from mathematics; first used by John Wallis in 1655.",
+        // Level 2 – font-sensitive symbols
+        "&": "Ampersand, meaning “and”. It began as a joined-up Latin “et”, which you can still see in italic fonts.",
+        "@": "Commercial at, once used in trade (“5 apples @ 10¢”) and now the separator in e-mail addresses.",
+        "§": "Section sign, used to refer to sections of laws and documents.",
+        "¶": "Pilcrow, which marks a paragraph; editors use it to show hidden line breaks.",
+        "?": "Question mark.",
+        "#": "Number sign (hash). In programming it often starts a comment; on social media it starts a hashtag.",
+        "$": "Dollar sign; also marks variables in PHP and shell scripts.",
+        "%": "Percent sign; also the remainder (modulo) operator in many programming languages.",
+        "€": "Euro sign, created in 1996. It is a C-like shape with two bars, suggesting E for Europe.",
+        "£": "Pound sterling. It comes from a stylised L for Latin “libra”, a pound in weight.",
+        "¥": "Yen/yuan sign, the currency of Japan and China.",
+        "g": "Latin small g. Fonts draw it either with two loops (“binocular g”) or with an open tail.",
+        "a": "Latin small a. Fonts draw it either with two storeys (a) or one (ɑ), especially in italics and handwriting.",
+        "Q": "Latin capital Q. Its tail looks very different from font to font.",
+        "R": "Latin capital R.",
+        "G": "Latin capital G. Some fonts give it a spur and others don't.",
+        "ß": "Eszett (sharp s), used in German. It started as a joined long s + s (or z).",
+        "y": "Latin small y.",
+        "k": "Latin small k.",
+        // Lookalike group: ω
+        "ω": "Greek omega, the last letter of the Greek alphabet. In physics it stands for angular velocity.",
+        "ო": "Georgian letter “on”, the sound /o/ in Georgian (Mkhedruli script). It looks like ω, but it comes from a completely different alphabet.",
+        "ɯ": "IPA letter (turned m) for a vowel like “u” said without rounding the lips, as in Korean 으.",
+        "w": "Latin small w, originally a doubled “v” (u).",
+        "ϖ": "Greek pi symbol, a curly form of π used in some math and physics formulas.",
+        "ɷ": "IPA closed omega, an old phonetic symbol that is no longer used.",
+        // Lookalike group: ε (skipped in level 4)
+        "ε": "Greek epsilon. In math it means a tiny positive number.",
+        "є": "Cyrillic Ukrainian “ye”, as in the Ukrainian word “є” (“is”).",
+        "з": "Cyrillic small “ze”, the /z/ sound in Russian, Ukrainian, Bulgarian and other languages.",
+        "∈": "Math “element of”: x ∈ A means “x belongs to set A”.",
+        "ɜ": "IPA reversed open e, the vowel in British English “bird”.",
+        "ʒ": "IPA ezh, the sound “s” makes in “measure” and “vision”.",
+        // Lookalike group: n
+        "n": "Latin small n.",
+        "η": "Greek eta. In physics it often stands for efficiency or viscosity.",
+        "ŋ": "Latin eng, the “ng” sound in “sing”. It is used in IPA and in Sami and some African languages.",
+        "п": "Cyrillic small “pe”, the /p/ sound. It is related to Greek π.",
+        "ռ": "Armenian small “ra”, a rolled r sound.",
+        "ƞ": "Latin n with a long right leg, formerly used in IPA and in Lakota writing.",
+        // Lookalike group: x
+        "x": "Latin small x; also the most common variable in algebra.",
+        "χ": "Greek chi, the “kh” sound; in statistics it appears in the χ² test.",
+        "×": "Multiplication sign, the proper math character (not the letter x).",
+        "✕": "Multiplication X from the Dingbats block, often used as a “close” or “wrong” mark.",
+        "ㄨ": "Bopomofo letter “u”, from the phonetic alphabet used to teach Mandarin in Taiwan.",
+        // Lookalike group: 3
+        "3": "Digit three.",
+        "З": "Cyrillic capital “Ze” (/z/). It is not the digit 3: it has a rounder top and is a letter.",
+        "Ʒ": "Capital ezh, used in Skolt Sami and in phonetics.",
+        "ȝ": "Yogh, a Middle English letter for sounds like “gh” or “y”. It survives in spellings such as “Menzies”.",
+        "ვ": "Georgian letter “vin”, the /v/ sound.",
+        // Lookalike group: p
+        "p": "Latin small p.",
+        "ρ": "Greek rho, the /r/ sound; in physics it means density.",
+        "þ": "Thorn, the “th” sound. It was used in Old English and is still used in Icelandic.",
+        "ƿ": "Wynn, an Old English letter for /w/ that was later replaced by w.",
+        "ҏ": "Cyrillic er with tick, used in Sami transcription.",
+        // Lookalike group: ν / υ
+        "ν": "Greek nu, the /n/ sound. In physics it is frequency, and it looks almost like the Latin v.",
+        "υ": "Greek upsilon, the ancestor of Latin Y and V.",
+        "ʋ": "IPA v with hook, a sound between v and w, as in the Hindi “व”.",
+        "ѵ": "Cyrillic izhitsa, an old letter taken from Greek upsilon and removed from Russian spelling in 1918.",
+        "u": "Latin small u.",
+        "ʊ": "IPA upsilon, the short vowel in “book” and “put”.",
+        // Lookalike group: Δ
+        "Δ": "Greek capital delta; in math and physics it means “change in” (Δt).",
+        "Λ": "Greek capital lambda, the /l/ sound; in physics it is the cosmological constant.",
+        "Д": "Cyrillic capital “De”, the /d/ sound. It is related to Greek Δ.",
+        "A": "Latin capital A. Its shape comes from an ox head (Phoenician aleph) turned on its side.",
+        "△": "White up-pointing triangle, a geometric shape rather than a letter.",
+        // Lookalike group: φ
+        "φ": "Greek small phi, used for angles and the golden ratio (φ ≈ 1.618).",
+        "ϕ": "Greek phi symbol, the “straight” variant of φ that mathematicians prefer.",
+        "ф": "Cyrillic small “ef”, the /f/ sound.",
+        "ø": "Latin o with stroke, a vowel letter in Danish and Norwegian (as in “smørrebrød”).",
+        "∅": "Empty set in math: a set with no elements.",
+        "Φ": "Greek capital Phi; in physics it means magnetic or electric flux.",
+        // Lookalike group: б
+        "б": "Cyrillic small “be”, the /b/ sound.",
+        "ƃ": "Latin b with top bar, used in the Zhuang language before 1982.",
+        "ƅ": "Latin tone six, used in Zhuang to mark the sixth tone.",
+        "ь": "Cyrillic soft sign. It has no sound of its own; it “softens” the consonant before it.",
+        "6": "Digit six.",
+        // Lookalike group: c
+        "c": "Latin small c.",
+        "ς": "Greek final sigma: σ is written as ς at the end of a word.",
+        "ɕ": "IPA c with curl, a soft “sh” sound as in Mandarin “x” (xi).",
+        "ç": "C with cedilla, the /s/ sound in French (garçon) and the /tʃ/ sound in Turkish.",
+        "¢": "Cent sign, 1/100 of a dollar.",
+        "ϛ": "Greek stigma, an old ligature of σ+τ that was also used as the numeral 6.",
+        // Lookalike group: ∫
+        "∫": "Integral sign from calculus. Leibniz drew it as a long S for “summa”.",
+        "ʃ": "IPA esh, the “sh” sound in “ship”.",
+        "ſ": "Long s, the ordinary form of s in the middle of words until about 1800. It is easy to mistake for f.",
+        "ƒ": "F with hook, used as the florin currency sign and in math for “function”.",
+        "ʆ": "IPA esh with curl, a rare phonetic symbol.",
+        // Lookalike group: Θ
+        "Θ": "Greek capital theta, the “th” sound; in computer science it is the Θ used for algorithm complexity.",
+        "Ө": "Cyrillic barred O, the vowel /ø/ in Kazakh, Mongolian, Tatar and other languages.",
+        "ʘ": "IPA bilabial click, a “kissing” click sound heard in some southern African languages.",
+        "⊙": "Circled dot operator, used in math (e.g. the Hadamard product) and in astronomy for the Sun.",
+        "⊕": "Circled plus, meaning XOR (exclusive or) in logic and computer science.",
+        // Lookalike group: ∩
+        "∩": "Intersection of sets: A ∩ B contains the elements that are in both sets.",
+        "Ո": "Armenian capital “Vo”.",
+        "Π": "Greek capital Pi.",
+        "⊓": "Square cap, meaning “meet” (greatest lower bound) in order theory.",
+        "∏": "N-ary product: multiplying many terms, the same way ∑ adds them.",
+      };
+
+      const BLOCKS = [
+        [0x0000, 0x007f, "Basic Latin"],
+        [0x0080, 0x00ff, "Latin-1 Supplement"],
+        [0x0100, 0x017f, "Latin Extended-A"],
+        [0x0180, 0x024f, "Latin Extended-B"],
+        [0x0250, 0x02af, "IPA Extensions"],
+        [0x0370, 0x03ff, "Greek and Coptic"],
+        [0x0400, 0x04ff, "Cyrillic"],
+        [0x0530, 0x058f, "Armenian"],
+        [0x10a0, 0x10ff, "Georgian"],
+        [0x20a0, 0x20cf, "Currency Symbols"],
+        [0x2200, 0x22ff, "Mathematical Operators"],
+        [0x2300, 0x23ff, "Miscellaneous Technical"],
+        [0x25a0, 0x25ff, "Geometric Shapes"],
+        [0x2600, 0x26ff, "Miscellaneous Symbols"],
+        [0x2700, 0x27bf, "Dingbats"],
+        [0x3100, 0x312f, "Bopomofo"],
+      ];
+
+      // Level 1: clearly different symbols. Level 2: symbols whose shape changes a lot between fonts.
+      const EASY = [..."★♥♠♣♦♪♫☂✈☯✿☘☃✂✉♞☎☾♛✦⌘☮♻⚘&@§¶#$%€£¥∞"];
+      const FONTY = [..."&@§¶?$€£%#gaQRGßyk"];
+
+      // Levels 3-4: groups of lookalikes from different scripts/blocks.
+      // Every member stays visually distinguishable; `norot` groups contain pairs that
+      // become each other when rotated (e.g. ε ↔ з), so they are skipped in level 4.
+      const LOOKALIKES = [
+        { chars: "ωოɯwϖɷ" },
+        { chars: "εєз∈ɜʒ", norot: true },
+        { chars: "nηŋпռƞ" },
+        { chars: "xχ×✕ㄨ" },
+        { chars: "3ЗƷȝვ" },
+        { chars: "pρþƿҏ" },
+        { chars: "νυʋѵuʊ" },
+        { chars: "ΔΛДA△" },
+        { chars: "φϕфø∅Φ" },
+        { chars: "бƃƅь6" },
+        { chars: "cςɕç¢ϛ" },
+        { chars: "∫ʃſƒʆ" },
+        { chars: "ΘӨʘ⊙⊕" },
+        { chars: "∩ՈΠ⊓∏" },
+      ].map((g) => ({ ...g, chars: [...g.chars] }));
+
+      const FALLBACK = '"Noto Sans Georgian", "Noto Sans Armenian", "Noto Serif"';
+      const FONTS = [
+        { css: `"Noto Serif", ${FALLBACK}, serif` },
+        { css: `"Noto Serif", ${FALLBACK}, serif`, style: "italic" },
+        { css: `"Roboto Mono", ${FALLBACK}, monospace` },
+        { css: `"Caveat", ${FALLBACK}, cursive` },
+        { css: `"Comfortaa", ${FALLBACK}, sans-serif` },
+        { css: `"Lobster", ${FALLBACK}, cursive` },
+        { css: `"Playfair Display", ${FALLBACK}, serif`, style: "italic" },
+        { css: `"Press Start 2P", ${FALLBACK}, monospace`, scale: 0.7 },
+        { css: `"UnifrakturMaguntia", ${FALLBACK}, serif` },
+        { css: `"Noto Serif Georgian", "Noto Sans Armenian", "Noto Serif", serif` },
+        { css: `system-ui, sans-serif` },
+      ];
+      const BASE_FONT = FONTS[0];
+
+      const LEVELS = [
+        {
+          name: "Level 1 · Warm-up",
+          desc: "Easy, clearly different symbols",
+          sample: "★",
+          task: "Pick every tile with the <strong>same symbol</strong>.",
+          pool: () => EASY,
+          fonts: false, rotate: false,
+        },
+        {
+          name: "Level 2 · Fonts",
+          desc: "Simple symbols, many different fonts",
+          sample: "&",
+          task: "Same symbols, <strong>different fonts</strong>. A character keeps its identity whatever the typeface.",
+          pool: () => FONTY,
+          fonts: true, rotate: false,
+        },
+        {
+          name: "Level 3 · Lookalikes",
+          desc: "ო vs ω — twins from different scripts",
+          sample: "ო",
+          task: "Watch out: some tiles are <strong>lookalikes</strong> from other alphabets or Unicode blocks.",
+          lookalikes: true,
+          fonts: false, rotate: false,
+        },
+        {
+          name: "Level 4 · Chaos",
+          desc: "Lookalikes + fonts + rotation",
+          sample: "ω",
+          task: "Lookalikes in <strong>different fonts</strong>, and they <strong>spin</strong>. Trust the shape, not the style.",
+          lookalikes: true,
+          fonts: true, rotate: true,
+        },
+      ];
+
+      const ROUNDS = 8;
+      const CELLS = 16;
+
+      // ---------- Helpers ----------
+      const $ = (id) => document.getElementById(id);
+      const rand = (n) => Math.floor(Math.random() * n);
+      const pick = (arr) => arr[rand(arr.length)];
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = rand(i + 1);
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      const cp = (ch) => "U+" + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+      function blockOf(ch) {
+        const c = ch.codePointAt(0);
+        const b = BLOCKS.find(([lo, hi]) => c >= lo && c <= hi);
+        return b ? b[2] : "";
+      }
+      // U+FE0E asks for text (not emoji) presentation so fonts/colours still apply.
+      const display = (ch) => ch + "︎";
+
+      function storeGet(key) {
+        try { return localStorage.getItem(key); } catch { return null; }
+      }
+      function storeSet(key, val) {
+        try { localStorage.setItem(key, val); } catch {}
+      }
+      const bestKey = (i) => "unicode-twins-best-" + i;
+
+      // ---------- Round generation ----------
+      function buildRound(level) {
+        let target, decoyPool;
+        if (level.lookalikes) {
+          const groups = level.rotate ? LOOKALIKES.filter((g) => !g.norot) : LOOKALIKES;
+          const group = pick(groups);
+          target = pick(group.chars);
+          decoyPool = group.chars.filter((c) => c !== target);
+        } else {
+          const pool = level.pool();
+          target = pick(pool);
+          decoyPool = shuffle(pool.filter((c) => c !== target)).slice(0, 5);
+        }
+        const twins = 3 + rand(4); // 3..6
+        const chars = [...Array(twins).fill(target)];
+        while (chars.length < CELLS) chars.push(pick(decoyPool));
+        return {
+          target,
+          cells: shuffle(chars).map((ch) => ({
+            ch,
+            font: level.fonts ? pick(FONTS) : BASE_FONT,
+            rot: level.rotate ? rand(360) : 0,
+            dur: 4 + Math.random() * 8,
+            dir: Math.random() < 0.5 ? "normal" : "reverse",
+            selected: false,
+          })),
+        };
+      }
+
+      // ---------- State ----------
+      let state = null;
+
+      function showScreen(id) {
+        for (const s of ["menu", "game", "result"]) $(s).classList.toggle("hidden", s !== id);
+      }
+
+      function renderMenu() {
+        const wrap = $("levels");
+        wrap.innerHTML = "";
+        LEVELS.forEach((lv, i) => {
+          const best = storeGet(bestKey(i));
+          const btn = document.createElement("button");
+          btn.className = "level-btn";
+          btn.innerHTML = `
+            <span class="sample">${lv.sample}</span>
+            <span class="name">${lv.name}</span>
+            <span class="desc">${lv.desc}</span>
+            <span class="best">${best !== null ? "Best: " + best : "&nbsp;"}</span>`;
+          btn.addEventListener("click", () => startLevel(i));
+          wrap.appendChild(btn);
+        });
+        showScreen("menu");
+      }
+
+      function startLevel(i) {
+        state = { levelIndex: i, level: LEVELS[i], round: 0, score: 0, perfect: 0, correct: 0, wrong: 0, missed: 0 };
+        showScreen("game");
+        nextRound();
+      }
+
+      function nextRound() {
+        state.round++;
+        state.current = buildRound(state.level);
+        state.checked = false;
+        $("hud-level").textContent = state.levelIndex + 1;
+        $("hud-round").textContent = `${state.round}/${ROUNDS}`;
+        $("hud-score").textContent = state.score;
+        $("target").textContent = display(state.current.target);
+        $("task").innerHTML = state.level.task;
+        $("msg").textContent = "";
+        $("btn-check").classList.remove("hidden");
+        $("btn-check").disabled = true;
+        $("btn-next").classList.add("hidden");
+        $("reveal").classList.add("hidden");
+        renderGrid();
+      }
+
+      function renderGrid() {
+        const grid = $("grid");
+        grid.innerHTML = "";
+        state.current.cells.forEach((cell, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "cell";
+          btn.setAttribute("aria-label", "Tile " + (idx + 1));
+          const g = document.createElement("span");
+          g.className = "glyph";
+          g.textContent = display(cell.ch);
+          g.style.fontFamily = cell.font.css;
+          if (cell.font.style) g.style.fontStyle = cell.font.style;
+          if (cell.font.scale) g.style.fontSize = `calc(clamp(30px, 9vw, 52px) * ${cell.font.scale})`;
+          if (state.level.rotate) {
+            g.classList.add("spin");
+            g.style.setProperty("--start", cell.rot + "deg");
+            g.style.setProperty("--dur", cell.dur.toFixed(1) + "s");
+            g.style.setProperty("--dir", cell.dir);
+          }
+          btn.appendChild(g);
+          btn.addEventListener("click", () => toggle(idx, btn));
+          grid.appendChild(btn);
+        });
+      }
+
+      function toggle(idx, btn) {
+        if (state.checked) return;
+        const cell = state.current.cells[idx];
+        cell.selected = !cell.selected;
+        btn.classList.toggle("selected", cell.selected);
+        $("btn-check").disabled = !state.current.cells.some((c) => c.selected);
+      }
+
+      function check() {
+        if (state.checked) return;
+        state.checked = true;
+        const { target, cells } = state.current;
+        let good = 0, bad = 0, miss = 0;
+        const tiles = $("grid").children;
+        cells.forEach((cell, i) => {
+          const isTwin = cell.ch === target;
+          const t = tiles[i];
+          t.disabled = true;
+          t.classList.remove("selected");
+          if (cell.selected && isTwin) { good++; t.classList.add("correct"); }
+          else if (cell.selected) { bad++; t.classList.add("wrong"); }
+          else if (isTwin) { miss++; t.classList.add("missed"); }
+          const code = document.createElement("span");
+          code.className = "code";
+          code.textContent = cp(cell.ch);
+          t.appendChild(code);
+        });
+        const perfect = bad === 0 && miss === 0;
+        const pts = Math.max(0, good - bad) + (perfect ? 2 : 0);
+        state.score += pts;
+        state.correct += good;
+        state.wrong += bad;
+        state.missed += miss;
+        if (perfect) state.perfect++;
+        $("hud-score").textContent = state.score;
+        $("msg").textContent = perfect
+          ? `Perfect! +${pts}`
+          : `+${pts} · ${good} right, ${bad} wrong, ${miss} missed`;
+        $("msg").style.color = perfect ? "var(--good)" : "var(--text)";
+        renderReveal();
+        $("btn-check").classList.add("hidden");
+        $("btn-next").classList.remove("hidden");
+        $("btn-next").textContent = state.round >= ROUNDS ? "See results" : "Next round";
+        $("btn-next").focus();
+      }
+
+      function renderReveal() {
+        const { target, cells } = state.current;
+        const counts = new Map();
+        cells.forEach((c) => counts.set(c.ch, (counts.get(c.ch) || 0) + 1));
+        const chars = [target, ...[...counts.keys()].filter((c) => c !== target)];
+        $("reveal-table").innerHTML = chars
+          .map(
+            (ch) => `<tr class="${ch === target ? "is-target" : ""}">
+              <td class="g">${display(ch)}</td>
+              <td class="cp">${cp(ch)}</td>
+              <td><div class="uname">${NAMES[ch] || ""}${ch === target ? " (target)" : ""}</div>
+                <div class="explain">${EXPLAIN[ch] || ""}</div></td>
+              <td class="blk">${blockOf(ch)}</td>
+              <td class="cp">×${counts.get(ch)}</td>
+            </tr>`
+          )
+          .join("");
+        $("reveal").classList.remove("hidden");
+      }
+
+      function afterRound() {
+        if (state.round < ROUNDS) return nextRound();
+        const i = state.levelIndex;
+        const prev = Number(storeGet(bestKey(i)) ?? -1);
+        const isBest = state.score > prev;
+        if (isBest) storeSet(bestKey(i), state.score);
+        $("res-title").textContent = `${LEVELS[i].name} complete`;
+        $("res-score").textContent = state.score;
+        $("res-detail").textContent =
+          `${state.perfect}/${ROUNDS} perfect rounds · ${state.correct} twins found, ` +
+          `${state.wrong} lookalikes picked, ${state.missed} missed` +
+          (isBest ? " · new best!" : "");
+        $("res-next").classList.toggle("hidden", i >= LEVELS.length - 1);
+        showScreen("result");
+      }
+
+      // ---------- Wiring ----------
+      $("btn-check").addEventListener("click", check);
+      $("btn-next").addEventListener("click", afterRound);
+      $("btn-menu").addEventListener("click", renderMenu);
+      $("res-menu").addEventListener("click", renderMenu);
+      $("res-retry").addEventListener("click", () => startLevel(state.levelIndex));
+      $("res-next").addEventListener("click", () => startLevel(state.levelIndex + 1));
+
+      renderMenu();
+    </script>
+  </body>
+</html>
