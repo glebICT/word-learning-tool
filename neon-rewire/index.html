@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Rewire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07040f;
+        --panel: rgba(20, 10, 40, 0.72);
+        --grid: rgba(255, 43, 214, 0.07);
+        --text: #d9f7ff;
+        --muted: #7a7398;
+        --cyan: #00f0ff;
+        --magenta: #ff2bd6;
+        --yellow: #f5ff3b;
+        --red: #ff3355;
+        --green: #3bff9d;
+        --slot: rgba(0, 240, 255, 0.07);
+        --slot-edge: rgba(0, 240, 255, 0.16);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(transparent 0 calc(100% - 1px), var(--grid) 0) 0 0 / 100% 32px,
+          linear-gradient(90deg, transparent 0 calc(100% - 1px), var(--grid) 0) 0 0 / 32px 100%,
+          radial-gradient(ellipse at 50% -10%, #2a0b4a 0%, var(--bg) 60%);
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: "Share Tech Mono", ui-monospace, monospace;
+        overflow-x: hidden;
+      }
+      /* CRT scanlines */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0) 0 2px,
+          rgba(0, 0, 0, 0.22) 2px 3px
+        );
+        z-index: 10;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      h1 {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        font-size: clamp(28px, 8vw, 52px);
+        letter-spacing: 0.08em;
+        margin: 0;
+        color: #fff;
+        text-shadow:
+          0 0 6px var(--magenta),
+          0 0 18px var(--magenta),
+          2px 0 0 var(--cyan),
+          -2px 0 0 var(--magenta);
+        position: relative;
+        animation: flicker 6s infinite;
+      }
+      h1 span {
+        color: var(--cyan);
+        text-shadow:
+          0 0 6px var(--cyan),
+          0 0 18px var(--cyan);
+      }
+      .tagline {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 6px;
+        letter-spacing: 0.12em;
+      }
+      @keyframes flicker {
+        0%, 92%, 96%, 100% { opacity: 1; }
+        93% { opacity: 0.4; }
+        95% { opacity: 0.85; transform: translateX(2px); }
+      }
+
+      .hud {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      .stat {
+        border: 1px solid rgba(0, 240, 255, 0.25);
+        background: var(--panel);
+        padding: 6px 4px;
+        text-align: center;
+        clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      }
+      .stat b {
+        display: block;
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(14px, 4vw, 20px);
+        color: var(--cyan);
+        text-shadow: 0 0 8px var(--cyan);
+      }
+      .stat small {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .stat.warn b {
+        color: var(--magenta);
+        text-shadow: 0 0 8px var(--magenta);
+      }
+
+      .terminal {
+        position: relative;
+        border: 1px solid rgba(255, 43, 214, 0.45);
+        background: var(--panel);
+        box-shadow:
+          0 0 24px rgba(255, 43, 214, 0.15),
+          inset 0 0 40px rgba(0, 240, 255, 0.05);
+        padding: 18px 12px 16px;
+        clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+      }
+      .task {
+        font-size: 15px;
+        color: var(--yellow);
+        text-shadow: 0 0 6px rgba(245, 255, 59, 0.5);
+        margin-bottom: 14px;
+        text-align: center;
+        letter-spacing: 0.06em;
+      }
+      .task .k {
+        font-family: "Orbitron", sans-serif;
+        color: var(--magenta);
+        text-shadow: 0 0 8px var(--magenta);
+      }
+
+      .equation {
+        --n: 5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(2px, 1.2vw, 10px);
+        padding: 14px 0 10px;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .glyph {
+        display: block;
+        height: auto;
+        overflow: visible;
+      }
+      .glyph.d {
+        width: min(68px, calc((100vw - 72px) / var(--n)));
+      }
+      .glyph.o,
+      .glyph.e {
+        width: min(50px, calc((100vw - 72px) / var(--n) * 0.74));
+      }
+
+      .seg .hit {
+        fill: transparent;
+        stroke: transparent;
+        stroke-width: 9;
+        stroke-linejoin: round;
+      }
+      .seg .vis {
+        pointer-events: none;
+        transition: fill 0.12s, filter 0.12s;
+      }
+      .seg {
+        cursor: default;
+        outline: none;
+      }
+      .seg.off .vis {
+        fill: var(--slot);
+        stroke: var(--slot-edge);
+        stroke-width: 0.8;
+      }
+      .seg.on .vis {
+        fill: var(--cyan);
+        filter: drop-shadow(0 0 2px var(--cyan)) drop-shadow(0 0 6px var(--cyan));
+      }
+      .glyph.o .seg.on .vis,
+      .glyph.e .seg .vis {
+        fill: var(--magenta);
+        filter: drop-shadow(0 0 2px var(--magenta)) drop-shadow(0 0 6px var(--magenta));
+      }
+      .glyph.e .seg .vis {
+        opacity: 0.55;
+      }
+
+      .board.playing .seg.on {
+        cursor: grab;
+      }
+      .board.playing .seg.on:hover .vis,
+      .board.playing .seg.on:focus-visible .vis {
+        fill: #fff;
+      }
+      .board.holding .seg.off {
+        cursor: copy;
+      }
+      .board.holding .seg.off .vis {
+        stroke: rgba(245, 255, 59, 0.45);
+        stroke-dasharray: 2 2;
+      }
+      .board.holding .seg.off:hover .vis,
+      .board.holding .seg.off:focus-visible .vis {
+        fill: rgba(245, 255, 59, 0.5);
+        stroke: var(--yellow);
+        stroke-dasharray: none;
+        filter: drop-shadow(0 0 6px var(--yellow));
+      }
+      .seg.held .vis {
+        fill: transparent !important;
+        stroke: var(--magenta) !important;
+        stroke-width: 1.2 !important;
+        stroke-dasharray: 3 2 !important;
+        filter: none !important;
+        animation: blink 0.6s steps(2) infinite;
+      }
+      .seg.moved.on .vis {
+        fill: var(--yellow);
+        filter: drop-shadow(0 0 2px var(--yellow)) drop-shadow(0 0 7px var(--yellow));
+      }
+      .seg.hint-src .vis {
+        animation: hintpulse 0.7s ease-in-out infinite alternate;
+      }
+      .seg.hint-dst .vis {
+        fill: rgba(59, 255, 157, 0.35) !important;
+        stroke: var(--green) !important;
+        stroke-dasharray: none !important;
+        animation: blink 0.8s steps(2) infinite;
+      }
+      @keyframes hintpulse {
+        to {
+          fill: var(--green);
+          filter: drop-shadow(0 0 10px var(--green));
+        }
+      }
+      @keyframes blink {
+        50% { opacity: 0.25; }
+      }
+      .board.solved .seg.on .vis {
+        fill: var(--green);
+        filter: drop-shadow(0 0 3px var(--green)) drop-shadow(0 0 10px var(--green));
+      }
+      .board.failed .equation {
+        animation: glitch 0.35s steps(3) 2;
+      }
+      .board.failed .seg.on .vis {
+        fill: var(--red);
+        filter: drop-shadow(0 0 3px var(--red)) drop-shadow(0 0 8px var(--red));
+      }
+      @keyframes glitch {
+        0% { transform: translate(0); filter: none; }
+        33% { transform: translate(-4px, 1px) skewX(-6deg); filter: hue-rotate(90deg); }
+        66% { transform: translate(3px, -1px) skewX(4deg); }
+        100% { transform: translate(0); }
+      }
+
+      .log {
+        min-height: 3.2em;
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .log.good { color: var(--green); text-shadow: 0 0 8px rgba(59, 255, 157, 0.5); }
+      .log.bad { color: var(--red); text-shadow: 0 0 8px rgba(255, 51, 85, 0.5); }
+      .log.info { color: var(--yellow); }
+
+      .found {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 6px;
+        min-height: 28px;
+      }
+      .chip {
+        font-size: 14px;
+        padding: 3px 10px;
+        border: 1px solid var(--green);
+        color: var(--green);
+        background: rgba(59, 255, 157, 0.08);
+      }
+      .chip.locked {
+        border-color: rgba(122, 115, 152, 0.5);
+        color: var(--muted);
+        background: none;
+      }
+      .chip.revealed {
+        border-color: var(--magenta);
+        color: var(--magenta);
+        background: rgba(255, 43, 214, 0.08);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      button {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--cyan);
+        background: rgba(0, 240, 255, 0.06);
+        border: 1px solid var(--cyan);
+        padding: 10px 16px;
+        cursor: pointer;
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      }
+      button:hover:not(:disabled),
+      button:focus-visible {
+        background: var(--cyan);
+        color: var(--bg);
+        outline: none;
+      }
+      button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      button.primary {
+        color: var(--magenta);
+        border-color: var(--magenta);
+        background: rgba(255, 43, 214, 0.08);
+      }
+      button.primary:hover:not(:disabled),
+      button.primary:focus-visible {
+        background: var(--magenta);
+        color: #fff;
+      }
+      [hidden] {
+        display: none !important;
+      }
+
+      details {
+        margin-top: 26px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--cyan);
+        letter-spacing: 0.1em;
+      }
+      .back {
+        display: inline-block;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      #carry {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 30px;
+        height: 7px;
+        background: var(--magenta);
+        box-shadow: 0 0 6px var(--magenta), 0 0 14px var(--magenta);
+        clip-path: polygon(0 50%, 4px 0, calc(100% - 4px) 0, 100% 50%, calc(100% - 4px) 100%, 4px 100%);
+        pointer-events: none;
+        z-index: 20;
+        transform: translate(-9999px, 0);
+      }
+
+      @media (max-width: 480px) {
+        .hud { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        .stat small { font-size: 8px; letter-spacing: 0.06em; }
+        button { padding: 9px 12px; font-size: 11px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>NEON<span>//</span>REWIRE</h1>
+        <div class="tagline">&gt; jack in. move the segments. make the math true.</div>
+      </header>
+
+      <div class="hud" aria-live="polite">
+        <div class="stat"><b id="s-level">1</b><small>level</small></div>
+        <div class="stat"><b id="s-credits">0</b><small>credits</small></div>
+        <div class="stat"><b id="s-streak">0</b><small>streak</small></div>
+        <div class="stat" id="moves-stat"><b id="s-moves">0/1</b><small>moves</small></div>
+        <div class="stat"><b id="s-sols">0/1</b><small>solutions</small></div>
+      </div>
+
+      <section class="terminal board playing" id="board">
+        <div class="task" id="task"></div>
+        <div class="equation" id="equation" role="group" aria-label="Equation"></div>
+        <div class="found" id="found"></div>
+        <div class="log" id="log" role="status" aria-live="polite"></div>
+      </section>
+
+      <div class="controls">
+        <button id="b-undo">Undo</button>
+        <button id="b-reset">Reset</button>
+        <button id="b-hint">Hint −5</button>
+        <button id="b-reveal">Reveal</button>
+        <button id="b-again" hidden>Find another</button>
+        <button id="b-next" class="primary" hidden>Next ▸</button>
+      </div>
+
+      <details>
+        <summary>&gt; HOW TO PLAY</summary>
+        <p>
+          Every digit and the <code>+</code>/<code>−</code> sign is built from glowing segments,
+          like matchsticks. Click a lit segment to pull it into your buffer, then click any empty
+          slot to wire it back in. Segments can travel between digits and the sign: take the
+          vertical bar off a <code>+</code> to make a <code>−</code>, or drop one into a
+          <code>9</code> to get an <code>8</code>.
+        </p>
+        <p>
+          Use exactly the number of moves shown (or fewer) to make the equation true. The
+          <code>=</code> sign is hard-wired. Every digit must stay a real digit, and multi-digit
+          numbers can't start with <code>0</code>.
+        </p>
+        <p>
+          Many puzzles have more than one fix. Find them all for bonus credits. Click a segment
+          you're holding (or its empty origin) to put it back for free.
+        </p>
+      </details>
+      <a class="back" href="../">← all games</a>
+    </main>
+    <div id="carry" aria-hidden="true"></div>
+
+    <script>
+      // ---------- model ----------
+      // Digit segments as bits: a=0 (top), b=1, c=2, d=3 (bottom), e=4, f=5, g=6 (middle)
+      const DIGITS = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f];
+      // Operator segments: h=0 (horizontal), v=1 (vertical)
+      const PLUS = 3,
+        MINUS = 1;
+      const OPS = [PLUS, MINUS];
+      const EQ = 3;
+
+      const pop = (m) => {
+        let c = 0;
+        for (; m; m &= m - 1) c++;
+        return c;
+      };
+
+      function kindsFor(shape) {
+        const [la, lb, lc] = shape;
+        return [...Array(la).fill("d"), "o", ...Array(lb).fill("d"), "e", ...Array(lc).fill("d")];
+      }
+
+      // Returns "invalid" | "false" | "true"
+      function evaluate(kinds, masks) {
+        const nums = [];
+        let cur = "",
+          op = null;
+        for (let i = 0; i <= kinds.length; i++) {
+          const k = kinds[i];
+          if (k === "d") {
+            const d = DIGITS.indexOf(masks[i]);
+            if (d < 0) return "invalid";
+            cur += d;
+            continue;
+          }
+          if (cur.length > 1 && cur[0] === "0") return "invalid";
+          nums.push(+cur);
+          cur = "";
+          if (k === "o") {
+            op = masks[i] === PLUS ? "+" : masks[i] === MINUS ? "-" : null;
+            if (!op) return "invalid";
+          }
+        }
+        const [a, b, c] = nums;
+        return (op === "+" ? a + b : a - b) === c ? "true" : "false";
+      }
+
+      function toText(kinds, masks) {
+        return kinds
+          .map((k, i) =>
+            k === "d"
+              ? DIGITS.indexOf(masks[i])
+              : k === "e"
+                ? " = "
+                : masks[i] === PLUS
+                  ? " + "
+                  : masks[i] === MINUS
+                    ? " − "
+                    : " ? ",
+          )
+          .join("");
+      }
+
+      // All glyph-valid states reachable from `src` by moving between lo and hi segments.
+      // A move takes one lit segment off and lights one empty slot, so the target must
+      // have as many segments switched on as switched off.
+      function neighbors(kinds, src, lo, hi) {
+        const out = [];
+        const cur = new Array(src.length);
+        (function rec(i, on, off) {
+          if (on > hi || off > hi) return;
+          if (i === src.length) {
+            if (on === off && on >= lo) out.push(cur.slice());
+            return;
+          }
+          const s = src[i];
+          const opts = kinds[i] === "d" ? DIGITS : kinds[i] === "o" ? OPS : [s];
+          for (const m of opts) {
+            cur[i] = m;
+            rec(i + 1, on + pop(m & ~s), off + pop(s & ~m));
+          }
+        })(0, 0, 0);
+        return out;
+      }
+
+      const rand = (n) => Math.floor(Math.random() * n);
+      const pick = (arr) => arr[rand(arr.length)];
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = rand(i + 1);
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function randomTrue(shape) {
+        const range = (len) => (len === 1 ? [0, 9] : [10, 99]);
+        const [ra, rb, rc] = shape.map(range);
+        for (let t = 0; t < 400; t++) {
+          const a = ra[0] + rand(ra[1] - ra[0] + 1);
+          const b = rb[0] + rand(rb[1] - rb[0] + 1);
+          const plus = Math.random() < 0.5;
+          const c = plus ? a + b : a - b;
+          if (c < rc[0] || c > rc[1]) continue;
+          const digits = `${a}${b}${c}`.split("").map((d) => DIGITS[d]);
+          const masks = [];
+          const kinds = kindsFor(shape);
+          let di = 0;
+          for (const k of kinds) masks.push(k === "d" ? digits[di++] : k === "o" ? (plus ? PLUS : MINUS) : EQ);
+          return masks;
+        }
+        return null;
+      }
+
+      function difficulty(level) {
+        if (level <= 3) return { shape: [1, 1, 1], k: 1 };
+        if (level <= 6) return { shape: pick([[1, 1, 1], [1, 1, 2], [2, 1, 1]]), k: 1 };
+        if (level <= 9) return { shape: pick([[1, 1, 1], [1, 1, 2], [2, 1, 1]]), k: 2 };
+        return { shape: pick([[2, 1, 2], [2, 1, 1], [1, 1, 2], [2, 2, 2]]), k: 2 };
+      }
+
+      function makePuzzle(level) {
+        for (let tries = 0; tries < 120; tries++) {
+          const { shape, k } = tries < 100 ? difficulty(level) : { shape: [1, 1, 1], k: 1 };
+          const kinds = kindsFor(shape);
+          const truth = randomTrue(shape);
+          if (!truth) continue;
+          // Break a true equation with exactly k moves into a still-readable but false one
+          const broken = shuffle(
+            neighbors(kinds, truth, k, k).filter((m) => evaluate(kinds, m) === "false"),
+          );
+          for (const start of broken.slice(0, 12)) {
+            const sols = neighbors(kinds, start, 1, k).filter((m) => evaluate(kinds, m) === "true");
+            if (sols.length >= 1 && sols.length <= 3) return { kinds, k, start, sols };
+          }
+        }
+        throw new Error("puzzle generator exhausted");
+      }
+
+      // ---------- geometry ----------
+      const T = 4.2;
+      const hp = (x1, x2, y) =>
+        `${x1},${y} ${x1 + T},${y - T} ${x2 - T},${y - T} ${x2},${y} ${x2 - T},${y + T} ${x1 + T},${y + T}`;
+      const vp = (x, y1, y2) =>
+        `${x},${y1} ${x + T},${y1 + T} ${x + T},${y2 - T} ${x},${y2} ${x - T},${y2 - T} ${x - T},${y1 + T}`;
+      const GEOM = {
+        d: {
+          box: "-6 0 72 110",
+          names: ["top", "upper right", "lower right", "bottom", "lower left", "upper left", "middle"],
+          segs: [hp(11, 49, 7), vp(53, 11, 53), vp(53, 57, 99), hp(11, 49, 103), vp(7, 57, 99), vp(7, 11, 53), hp(11, 49, 55)],
+        },
+        o: { box: "0 0 44 110", names: ["horizontal", "vertical"], segs: [hp(5, 39, 55), vp(22, 38, 72)] },
+        e: { box: "0 0 44 110", names: ["upper", "lower"], segs: [hp(5, 39, 45), hp(5, 39, 65)] },
+      };
+
+      // ---------- state ----------
+      const $ = (id) => document.getElementById(id);
+      const store = {
+        get(k, d) {
+          try {
+            const v = localStorage.getItem("neon-rewire:" + k);
+            return v == null ? d : JSON.parse(v);
+          } catch {
+            return d;
+          }
+        },
+        set(k, v) {
+          try {
+            localStorage.setItem("neon-rewire:" + k, JSON.stringify(v));
+          } catch {}
+        },
+      };
+
+      let level = store.get("level", 1);
+      let credits = store.get("credits", 0);
+      let streak = 0;
+      let puz, masks, moves, held, status, found, revealed, hint, hintUsed;
+      let segEls = []; // segEls[slot][bit] = <g>
+
+      function newPuzzle() {
+        puz = makePuzzle(level);
+        found = new Set();
+        revealed = new Set();
+        hintUsed = false;
+        build();
+        resetBoard();
+        log(`> breach target loaded. move ${puz.k} segment${puz.k > 1 ? "s" : ""}.`, "");
+      }
+
+      function resetBoard() {
+        masks = puz.start.slice();
+        moves = [];
+        held = null;
+        hint = null;
+        status = "play";
+        render();
+      }
+
+      // ---------- DOM ----------
+      const SVGNS = "http://www.w3.org/2000/svg";
+      function build() {
+        const eq = $("equation");
+        eq.innerHTML = "";
+        eq.style.setProperty("--n", puz.kinds.length);
+        segEls = puz.kinds.map((k, i) => {
+          const g = GEOM[k];
+          const svg = document.createElementNS(SVGNS, "svg");
+          svg.setAttribute("viewBox", g.box);
+          svg.setAttribute("class", "glyph " + k);
+          const wrap = document.createElementNS(SVGNS, "g");
+          if (k === "d") wrap.setAttribute("transform", "translate(6 0) skewX(-6)");
+          svg.appendChild(wrap);
+          const els = g.segs.map((pts, b) => {
+            const s = document.createElementNS(SVGNS, "g");
+            s.setAttribute("class", "seg");
+            for (const cls of ["hit", "vis"]) {
+              const p = document.createElementNS(SVGNS, "polygon");
+              p.setAttribute("points", pts);
+              p.setAttribute("class", cls);
+              s.appendChild(p);
+            }
+            if (k !== "e") {
+              s.setAttribute("tabindex", "0");
+              s.setAttribute("role", "button");
+              s.addEventListener("click", () => onSeg(i, b));
+              s.addEventListener("keydown", (ev) => {
+                if (ev.key === "Enter" || ev.key === " ") {
+                  ev.preventDefault();
+                  onSeg(i, b);
+                }
+              });
+            }
+            wrap.appendChild(s);
+            return s;
+          });
+          eq.appendChild(svg);
+          return els;
+        });
+      }
+
+      function render() {
+        const board = $("board");
+        board.classList.toggle("playing", status === "play");
+        board.classList.toggle("holding", !!held);
+        board.classList.toggle("solved", status === "solved" || status === "revealed");
+        board.classList.toggle("failed", status === "failed");
+
+        const movedTo = new Set(moves.map((m) => m.to.i + ":" + m.to.b));
+        puz.kinds.forEach((k, i) => {
+          const g = GEOM[k];
+          segEls[i].forEach((el, b) => {
+            const on = !!(masks[i] & (1 << b));
+            const isHeld = held && held.i === i && held.b === b;
+            const key = i + ":" + b;
+            el.classList.toggle("on", on);
+            el.classList.toggle("off", !on);
+            el.classList.toggle("held", !!isHeld);
+            el.classList.toggle("moved", movedTo.has(key));
+            el.classList.toggle("hint-src", !!hint && hint.src === key && status === "play");
+            el.classList.toggle("hint-dst", !!hint && hint.dst === key && status === "play");
+            if (k !== "e") {
+              const pos = k === "d" ? `digit ${puz.kinds.slice(0, i + 1).filter((x) => x === "d").length}` : "sign";
+              el.setAttribute(
+                "aria-label",
+                `${pos}, ${g.names[b]} segment, ${isHeld ? "held — activate to put back" : on ? "lit" : "empty"}`,
+              );
+            }
+          });
+        });
+
+        $("s-level").textContent = level;
+        $("s-credits").textContent = credits;
+        $("s-streak").textContent = streak;
+        $("s-moves").textContent = `${moves.length}/${puz.k}`;
+        $("moves-stat").classList.toggle("warn", moves.length >= puz.k);
+        $("s-sols").textContent = `${found.size + revealed.size}/${puz.sols.length}`;
+        $("task").innerHTML = `MOVE <span class="k">${puz.k}</span> SEGMENT${puz.k > 1 ? "S" : ""} TO FIX THE EQUATION`;
+
+        const done = status === "solved" || status === "revealed";
+        const remaining = puz.sols.length - found.size - revealed.size;
+        $("b-undo").disabled = done || (!moves.length && !held);
+        $("b-reset").disabled = done || (!moves.length && !held);
+        $("b-hint").disabled = status !== "play";
+        $("b-reveal").disabled = status === "revealed" || remaining === 0;
+        $("b-again").hidden = !done || remaining === 0;
+        $("b-next").hidden = !done;
+
+        const chips = $("found");
+        chips.innerHTML = "";
+        puz.sols.forEach((s) => {
+          const key = s.join(",");
+          const c = document.createElement("span");
+          if (found.has(key)) {
+            c.className = "chip";
+            c.textContent = "✓ " + toText(puz.kinds, s);
+          } else if (revealed.has(key)) {
+            c.className = "chip revealed";
+            c.textContent = "◇ " + toText(puz.kinds, s);
+          } else {
+            c.className = "chip locked";
+            c.textContent = "▒▒▒ ENCRYPTED ▒▒▒";
+          }
+          chips.appendChild(c);
+        });
+
+        $("carry").style.display = held ? "" : "none";
+      }
+
+      function log(text, cls) {
+        const el = $("log");
+        el.textContent = text;
+        el.className = "log " + (cls || "");
+      }
+
+      // ---------- interaction ----------
+      function onSeg(i, b) {
+        if (status !== "play" && status !== "failed") return;
+        const bit = 1 << b;
+        const on = !!(masks[i] & bit);
+
+        if (held) {
+          if (held.i === i && held.b === b) {
+            masks[i] |= bit; // put it back where it came from
+            held = null;
+            log("> segment returned. no move spent.", "");
+          } else if (on) {
+            masks[held.i] |= 1 << held.b; // swap what we're holding for this one
+            held = { i, b };
+            masks[i] &= ~bit;
+          } else {
+            masks[i] |= bit;
+            moves.push({ from: held, to: { i, b } });
+            held = null;
+            hint = null;
+            check();
+          }
+          render();
+          return;
+        }
+
+        if (!on) return;
+        if (status === "failed" || moves.length >= puz.k) {
+          log("> no moves left. undo or reset.", "bad");
+          return;
+        }
+        held = { i, b };
+        masks[i] &= ~bit;
+        log("> segment buffered. pick an empty slot.", "info");
+        render();
+      }
+
+      function check() {
+        const r = evaluate(puz.kinds, masks);
+        if (r === "true") {
+          const key = masks.join(",");
+          const text = toText(puz.kinds, masks);
+          if (found.has(key) || revealed.has(key)) {
+            log(`> ${text} — already decrypted. try another route.`, "info");
+            status = "solved";
+            return;
+          }
+          found.add(key);
+          const first = found.size === 1;
+          let gain = first ? 10 * puz.k + (hintUsed ? 0 : 5) : 5;
+          const remaining = puz.sols.length - found.size - revealed.size;
+          if (remaining === 0 && puz.sols.length > 1 && revealed.size === 0) gain += 10;
+          credits += gain;
+          if (first && !hintUsed) streak++;
+          status = "solved";
+          store.set("credits", credits);
+          log(
+            `> ${text}  ACCESS GRANTED  +${gain}¢` +
+              (remaining ? `  ·  ${remaining} more fix${remaining > 1 ? "es" : ""} hidden` : ""),
+            "good",
+          );
+          return;
+        }
+        if (moves.length >= puz.k) {
+          status = "failed";
+          streak = 0;
+          log(
+            r === "invalid"
+              ? "> CORRUPTED GLYPH. that's not a digit. undo or reset."
+              : `> CHECKSUM FAILED: ${toText(puz.kinds, masks)} is false.`,
+            "bad",
+          );
+        } else {
+          const left = puz.k - moves.length;
+          log(`> ${left} move${left > 1 ? "s" : ""} left.`, "");
+        }
+      }
+
+      function undo() {
+        if (held) {
+          masks[held.i] |= 1 << held.b;
+          held = null;
+        } else if (moves.length) {
+          const m = moves.pop();
+          masks[m.to.i] &= ~(1 << m.to.b);
+          masks[m.from.i] |= 1 << m.from.b;
+        }
+        status = "play";
+        hint = null;
+        log("> rolled back.", "");
+        render();
+      }
+
+      function unfound(sol) {
+        const key = sol.join(",");
+        return !found.has(key) && !revealed.has(key);
+      }
+
+      function giveHint() {
+        if (held) undo();
+        const left = puz.k - moves.length;
+        const targets = left
+          ? neighbors(puz.kinds, masks, 1, left).filter((m) => evaluate(puz.kinds, m) === "true" && unfound(m))
+          : [];
+        if (!targets.length) {
+          log("> dead end from here. undo or reset, then ask again.", "bad");
+          return;
+        }
+        const t = pick(targets);
+        const diff = (mask, other) =>
+          [...Array(7).keys()].find((b) => mask & ~other & (1 << b));
+        const srcSlot = masks.findIndex((m, i) => m & ~t[i]);
+        const dstSlot = masks.findIndex((m, i) => t[i] & ~m);
+        hint = {
+          src: srcSlot + ":" + diff(masks[srcSlot], t[srcSlot]),
+          dst: dstSlot + ":" + diff(t[dstSlot], masks[dstSlot]),
+        };
+        hintUsed = true;
+        streak = 0;
+        credits = Math.max(0, credits - 5);
+        store.set("credits", credits);
+        log("> intel: move the pulsing segment into the blinking slot.", "info");
+        render();
+      }
+
+      function reveal() {
+        const sol = puz.sols.find(unfound);
+        if (!sol) return;
+        revealed.add(sol.join(","));
+        masks = sol.slice();
+        moves = [];
+        held = null;
+        hint = null;
+        streak = 0;
+        status = "revealed";
+        log(`> override: ${toText(puz.kinds, sol)}`, "info");
+        render();
+      }
+
+      $("b-undo").onclick = undo;
+      $("b-reset").onclick = () => {
+        resetBoard();
+        log("> display restored.", "");
+      };
+      $("b-hint").onclick = giveHint;
+      $("b-reveal").onclick = reveal;
+      $("b-again").onclick = () => {
+        resetBoard();
+        log("> same target. find a different fix.", "");
+      };
+      $("b-next").onclick = () => {
+        level++;
+        store.set("level", level);
+        newPuzzle();
+      };
+
+      // Floating segment that follows the mouse while one is held
+      const carry = $("carry");
+      document.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return (carry.style.transform = "translate(-9999px,0)");
+        carry.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 10}px)`;
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && held) undo();
+        if ((e.key === "z" || e.key === "Z") && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          undo();
+        }
+      });
+
+      newPuzzle();
+    </script>
+  </body>
+</html>
