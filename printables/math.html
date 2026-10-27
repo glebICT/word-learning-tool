@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printables · Math</title>
+    <link href="fonts.css" rel="stylesheet" />
+    <link href="app.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <a class="back" href="./">← Printables</a>
+        <h1>Math problems</h1>
+        <p class="sub">Arithmetic worksheets to print.</p>
+
+        <fieldset>
+          <legend>Ready-made sets</legend>
+          <label for="level">Difficulty</label>
+          <select id="level"></select>
+          <p class="hint" id="level-hint"></p>
+          <div class="actions" style="margin-top: 8px">
+            <button class="btn ghost" id="apply-rec" type="button">Restore recommended settings</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Problems</legend>
+          <label>Operations</label>
+          <div class="row">
+            <label class="check"><input type="checkbox" id="add" /> +</label>
+            <label class="check"><input type="checkbox" id="sub" /> −</label>
+            <label class="check"><input type="checkbox" id="mul" /> ×</label>
+            <label class="check"><input type="checkbox" id="div" /> ÷</label>
+          </div>
+          <div id="addsub-opts">
+            <label>Numbers</label>
+            <div class="row sub-labels">
+              <div><label for="min">From</label><input type="number" id="min" min="0" max="9999" /></div>
+              <div><label for="max">To</label><input type="number" id="max" min="1" max="9999" /></div>
+              <div><label for="maxResult">Max result</label><input type="number" id="maxResult" min="0" max="99999" /></div>
+            </div>
+            <p class="hint">Max result 0 means no limit.</p>
+            <label>Carrying / borrowing</label>
+            <div class="seg" id="carry">
+              <button type="button" data-v="any">Any</button>
+              <button type="button" data-v="no">Never</button>
+              <button type="button" data-v="yes">Always</button>
+            </div>
+          </div>
+          <div id="muldiv-opts">
+            <label>Times tables</label>
+            <div class="row sub-labels">
+              <div><label for="mulMin">From</label><input type="number" id="mulMin" min="1" max="20" /></div>
+              <div><label for="mulMax">To</label><input type="number" id="mulMax" min="1" max="20" /></div>
+            </div>
+            <p class="hint">× and ÷ use these tables times 1 to 10.</p>
+          </div>
+          <label>Format</label>
+          <div class="seg" id="format">
+            <button type="button" data-v="row">7 + 5 = _</button>
+            <button type="button" data-v="missing">7 + _ = 12</button>
+            <button type="button" data-v="column">Column</button>
+          </div>
+        </fieldset>
+
+        <fieldset id="paper-box"></fieldset>
+
+        <fieldset>
+          <legend>Layout</legend>
+          <label for="cols">Columns <button class="rec" data-key="cols" type="button"></button></label>
+          <div class="num"><input type="range" id="cols" min="1" max="6" step="1" /><output></output></div>
+          <label for="h">Digit height <button class="rec" data-key="h" type="button"></button></label>
+          <div class="num"><input type="range" id="h" min="3" max="12" step="0.5" /><output></output></div>
+          <label for="pages">Pages</label>
+          <div class="num"><input type="range" id="pages" min="1" max="10" step="1" /><output></output></div>
+          <label class="check"><input type="checkbox" id="grid" /> Squared paper background</label>
+          <label for="font">Font</label>
+          <select id="font">
+            <optgroup label="Print" data-builtin>
+              <option value="Andika">Andika</option>
+              <option value="Pangolin">Pangolin</option>
+              <option value="Playpen Sans">Playpen Sans</option>
+              <option value="Balsamiq Sans">Balsamiq Sans</option>
+              <option value="Shantell Sans">Shantell Sans</option>
+              <option value="Neucha">Neucha</option>
+              <option value="Caveat">Caveat</option>
+            </optgroup>
+          </select>
+          <div class="actions" style="margin-top: 8px">
+            <label class="btn ghost">
+              Upload your own font
+              <input type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2" hidden />
+            </label>
+            <button class="btn ghost" id="font-clear" type="button" hidden>Remove yours</button>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn ghost" id="reroll" type="button">New problems</button>
+          <button class="btn" id="print" type="button">Print / PDF</button>
+        </div>
+        <p class="hint">For a PDF choose “Save as PDF” in the print dialog, scale 100%, no margins.</p>
+        <p class="stats" id="stats"></p>
+      </aside>
+      <main id="preview"></main>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+      const { $, el, round05 } = P;
+
+      const OPS = { add: "+", sub: "−", mul: "×", div: "÷" };
+      const NONE = { add: false, sub: false, mul: false, div: false };
+
+      // Ready-made sets from easiest to hardest, tuned for A4; A5 is derived in recommended().
+      const LEVELS = [
+        {
+          label: "Addition within 10",
+          hint: "Sums up to 10.",
+          base: { ...NONE, add: true, min: 0, max: 10, maxResult: 10, carry: "any", format: "row", cols: 2, h: 7 },
+        },
+        {
+          label: "Subtraction within 10",
+          hint: "Take away from numbers up to 10.",
+          base: { ...NONE, sub: true, min: 0, max: 10, maxResult: 10, carry: "any", format: "row", cols: 2, h: 7 },
+        },
+        {
+          label: "Add and subtract within 10",
+          hint: "Mixed + and −.",
+          base: { ...NONE, add: true, sub: true, min: 0, max: 10, maxResult: 10, carry: "any", format: "row", cols: 2, h: 6 },
+        },
+        {
+          label: "Within 20, crossing ten",
+          hint: "Every problem crosses ten: 8 + 5, 13 − 6.",
+          base: { ...NONE, add: true, sub: true, min: 2, max: 19, maxResult: 20, carry: "yes", format: "row", cols: 3, h: 5.5 },
+        },
+        {
+          label: "Missing number within 20",
+          hint: "Find the hidden number: 7 + _ = 12.",
+          base: { ...NONE, add: true, sub: true, min: 1, max: 19, maxResult: 20, carry: "any", format: "missing", cols: 3, h: 5.5 },
+        },
+        {
+          label: "Two-digit, no regrouping",
+          hint: "34 + 25, 87 − 43 without carrying.",
+          base: { ...NONE, add: true, sub: true, min: 10, max: 99, maxResult: 99, carry: "no", format: "row", cols: 3, h: 5 },
+        },
+        {
+          label: "Column add and subtract",
+          hint: "Two-digit column problems with carrying.",
+          base: { ...NONE, add: true, sub: true, min: 10, max: 99, maxResult: 0, carry: "yes", format: "column", cols: 5, h: 5 },
+        },
+        {
+          label: "Times tables 2–5",
+          hint: "Multiplication facts for 2, 3, 4 and 5.",
+          base: { ...NONE, mul: true, mulMin: 2, mulMax: 5, carry: "any", format: "row", cols: 3, h: 5 },
+        },
+        {
+          label: "Multiply and divide to 100",
+          hint: "All tables up to 10 × 10, with division.",
+          base: { ...NONE, mul: true, div: true, mulMin: 2, mulMax: 10, carry: "any", format: "row", cols: 3, h: 5 },
+        },
+        {
+          label: "Three-digit columns",
+          hint: "Column addition and subtraction up to 999.",
+          base: { ...NONE, add: true, sub: true, min: 100, max: 999, maxResult: 0, carry: "any", format: "column", cols: 4, h: 5 },
+        },
+      ];
+
+      function recommended(level, paper) {
+        const b = { min: 0, max: 10, maxResult: 0, mulMin: 2, mulMax: 10, ...LEVELS[level].base };
+        // A5 is ~30% narrower: two columns and slightly smaller digits.
+        if (!P.isSmall(paper)) return b;
+        return { ...b, cols: Math.min(b.cols, MAX_COLS_A5), h: Math.max(3, round05(b.h * 0.85)) };
+      }
+
+      // ---------- state ----------
+      const MAX_COLS_A5 = 2;
+      const SHARED_KEYS = ["paper", "orient", "namefield", "datefield", "holes"];
+      const paper = P.loadPaper();
+      const saved = P.load("printables.math");
+      const defaults = { level: 0, title: "", pages: 1, grid: true, font: "Andika", seed: 1 };
+      // Options in the URL win over saved ones; a different level starts from that level's defaults.
+      const known = { ...defaults, ...recommended(0, "A4") };
+      const fromUrl = P.readUrl(known);
+      if (!LEVELS[fromUrl.level]) delete fromUrl.level;
+      // Keep only current options, so settings dropped in older versions don't linger.
+      const own =
+        saved && LEVELS[saved.level] && (fromUrl.level ?? saved.level) === saved.level
+          ? Object.fromEntries(Object.entries(saved).filter(([k]) => k in known))
+          : {};
+      const level = fromUrl.level ?? own.level ?? 0;
+      let state = fitPaper({ ...defaults, ...recommended(level, paper.paper), ...own, ...fromUrl, ...paper });
+      P.writeUrl(state);
+
+      // A5 pages take at most two columns. Two A5 pages share an A4 sheet,
+      // so switching to 2 × A5 rounds the page count up to fill both halves.
+      function fitPaper(s, evenUp = true) {
+        const out = { ...s };
+        if (P.isSmall(out.paper)) out.cols = Math.min(out.cols, MAX_COLS_A5);
+        if (evenUp && out.paper === "2A5" && out.pages % 2) out.pages++;
+        return out;
+      }
+
+      function set(patch) {
+        if ("paper" in patch && P.isSmall(patch.paper) !== P.isSmall(state.paper)) {
+          const rec = recommended(state.level, patch.paper);
+          patch = { cols: rec.cols, h: rec.h, ...patch };
+        }
+        const evenUp = patch.paper === "2A5" && state.paper !== "2A5";
+        state = fitPaper({ ...state, ...patch }, evenUp);
+        const own = { ...state };
+        for (const k of SHARED_KEYS) delete own[k];
+        P.save("printables.math", own);
+        P.savePaper(state);
+        P.writeUrl(state);
+        syncControls();
+        scheduleRender();
+      }
+
+      // ---------- controls ----------
+      const levelSel = $("level");
+      LEVELS.forEach((l, i) => levelSel.add(new Option(`${i + 1}. ${l.label}`, i)));
+      const RANGES = { cols: "", h: "mm", pages: "" };
+      const NUMS = ["min", "max", "maxResult", "mulMin", "mulMax"];
+      const CHECKS = ["add", "sub", "mul", "div", "grid"];
+
+      const segSyncs = ["carry", "format"].map((k) => P.bindSeg($(k), () => state[k], (v) => set({ [k]: v })));
+      const paperSync = P.paperBox($("paper-box"), new Proxy({}, { get: (_, k) => state[k] }), set);
+
+      function syncControls() {
+        levelSel.value = state.level;
+        $("level-hint").textContent = LEVELS[state.level].hint;
+        for (const k of CHECKS) $(k).checked = !!state[k];
+        for (const k of NUMS) if (Number($(k).value) !== state[k] || $(k).value === "") $(k).value = state[k];
+        $("addsub-opts").hidden = !(state.add || state.sub);
+        $("muldiv-opts").hidden = !(state.mul || state.div);
+        if (fontsReady && ![...$("font").options].some((o) => o.value === state.font)) state.font = "Andika";
+        $("font").value = state.font;
+        segSyncs.forEach((f) => f());
+        paperSync();
+        const rec = recommended(state.level, state.paper);
+        $("cols").max = P.isSmall(state.paper) ? MAX_COLS_A5 : 6;
+        for (const [k, unit] of Object.entries(RANGES)) {
+          $(k).value = state[k];
+          $(k).nextElementSibling.textContent = state[k] + (unit ? " " + unit : "");
+          const btn = document.querySelector(`.rec[data-key="${k}"]`);
+          if (!btn) continue;
+          btn.hidden = state[k] === rec[k];
+          btn.textContent = `rec. ${rec[k]}${unit ? " " + unit : ""}`;
+        }
+      }
+
+      for (const k of Object.keys(RANGES)) $(k).addEventListener("input", (e) => set({ [k]: Number(e.target.value) }));
+      for (const k of NUMS)
+        $(k).addEventListener("change", (e) => set({ [k]: Math.max(0, Math.round(Number(e.target.value) || 0)) }));
+      for (const k of CHECKS) $(k).addEventListener("change", (e) => set({ [k]: e.target.checked }));
+      $("font").addEventListener("change", (e) => set({ font: e.target.value }));
+      levelSel.addEventListener("change", () => {
+        const level = Number(levelSel.value);
+        set({ level, ...recommended(level, state.paper) });
+      });
+      $("apply-rec").addEventListener("click", () => set(recommended(state.level, state.paper)));
+      document.querySelectorAll(".rec").forEach((b) =>
+        b.addEventListener("click", () => set({ [b.dataset.key]: recommended(state.level, state.paper)[b.dataset.key] })),
+      );
+      $("reroll").addEventListener("click", () => set({ seed: (Math.random() * 1e9) | 0 }));
+      $("print").addEventListener("click", () => window.print());
+
+      // ---------- problem generation ----------
+      function hasCarry(a, b) {
+        for (; a || b; a = Math.floor(a / 10), b = Math.floor(b / 10)) if ((a % 10) + (b % 10) >= 10) return true;
+        return false;
+      }
+
+      function hasBorrow(a, b) {
+        for (; b; a = Math.floor(a / 10), b = Math.floor(b / 10)) if (a % 10 < b % 10) return true;
+        return false;
+      }
+
+      function makeProblem(rand, seen) {
+        const ops = Object.keys(OPS).filter((o) => state[o]);
+        if (!ops.length) ops.push("add");
+        const R = (lo, hi) => (hi < lo ? lo : lo + Math.floor(rand() * (hi - lo + 1)));
+        const lo = Math.min(state.min, state.max), hi = Math.max(state.min, state.max);
+        const tLo = Math.max(1, Math.min(state.mulMin, state.mulMax)), tHi = Math.max(state.mulMin, state.mulMax, 1);
+        let p;
+        for (let t = 0; t < 400; t++) {
+          const op = ops[Math.floor(rand() * ops.length)];
+          let a, b, res;
+          if (op === "add" || op === "sub") {
+            a = R(lo, hi);
+            b = R(lo, hi);
+            if (op === "sub" && a < b) [a, b] = [b, a];
+            res = op === "add" ? a + b : a - b;
+            if (state.maxResult && Math.max(a, res) > state.maxResult) continue;
+            if (a === 0 && b === 0) continue;
+            // Relax the regrouping rule late so impossible ranges still produce problems.
+            const regroup = op === "add" ? hasCarry(a, b) : hasBorrow(a, b);
+            if (t < 300 && ((state.carry === "no" && regroup) || (state.carry === "yes" && !regroup))) continue;
+          } else if (op === "mul") {
+            a = R(tLo, tHi);
+            b = R(1, 10);
+            if (rand() < 0.5) [a, b] = [b, a];
+            res = a * b;
+          } else {
+            b = R(tLo, tHi);
+            res = R(1, 10);
+            a = b * res;
+          }
+          p = { op, a, b, res };
+          const key = `${op}${a},${b}`;
+          if (seen.has(key) && t < 350) continue;
+          seen.add(key);
+          break;
+        }
+        p.missing = state.format === "missing" ? (rand() < 0.5 ? "a" : "b") : "res";
+        return p;
+      }
+
+      const answerOf = (p) => p[p.missing];
+
+      // ---------- rendering ----------
+      function render() {
+        const g = P.geometry(state);
+        const font = state.font;
+        const h = state.h;
+        const c = h / 0.7; // grid cell; digits fill 70% of it
+        const size = h / P.glyphRatio(font, "8", 0.7);
+        const family = `"${font}", Andika, sans-serif`;
+        const top = g.top + g.headerH;
+        const nx = Math.floor((g.right - g.left) / c);
+        const ny = Math.floor((g.bottom - top) / c);
+        const column = state.format === "column";
+        const rowCells = column ? 4 : 2;
+        const usable = ny - (column ? 0 : 1);
+        // A5 pages get at most 7 rows, spread out to leave room for working.
+        const rows = Math.max(1, Math.min(Math.floor(usable / rowCells), P.isSmall(state.paper) ? 7 : Infinity));
+        const pitch = Math.max(rowCells, Math.floor(usable / rows));
+        const cols = Math.min(state.cols, Math.max(1, nx));
+        const colCells = Math.floor(nx / cols);
+        const perPage = rows * cols;
+
+        const rand = P.rng(state.seed);
+        const sheets = [];
+        let overflow = false;
+
+        const text = (svg, x, y, str, extra = {}) =>
+          (el("text", { x, y, "font-family": family, "font-size": size, fill: "#1f2a44", ...extra }, svg).textContent = str);
+        const label = (svg, x, y, n) =>
+          text(svg, x, y, n + ")", { "font-size": size * 0.55, fill: "#9a9a9a", "font-family": "Andika, sans-serif" });
+        const blank = (svg, x, y, w) =>
+          el("line", { x1: x, x2: x + w, y1: y + c * 0.08, y2: y + c * 0.08, stroke: "#8a8a8a", "stroke-width": 0.3 }, svg);
+
+        for (let pg = 0; pg < state.pages; pg++) {
+          const svg = P.newPage(g, state, family);
+          if (state.grid) {
+            const grp = el("g", { stroke: "#9cb6d8", "stroke-width": 0.12, "stroke-opacity": 0.8 }, svg);
+            for (let i = 0; i <= ny; i++) el("line", { x1: g.left, x2: g.left + nx * c, y1: top + i * c, y2: top + i * c }, grp);
+            for (let i = 0; i <= nx; i++) el("line", { x1: g.left + i * c, x2: g.left + i * c, y1: top, y2: top + ny * c }, grp);
+          }
+          const seen = new Set();
+          for (let i = 0; i < perPage; i++) {
+            const p = makeProblem(rand, seen);
+            // Fill down each column first, so numbering reads like a book.
+            const col = Math.floor(i / rows), row = i % rows;
+            const x0 = g.left + col * colCells * c;
+            const n = pg * perPage + i + 1; // numbering continues across pages
+
+            if (column && p.op !== "div") {
+              const rowTop = top + row * pitch * c;
+              const digits = (v) => String(v).split("");
+              const width = Math.max(String(p.a).length, String(p.b).length + 1, String(p.res).length);
+              const right = x0 + (2 + width) * c;
+              if (width + 2 > colCells) overflow = true;
+              label(svg, x0 + c * 0.1, rowTop + c * 0.85, n);
+              const putRight = (v, r) =>
+                digits(v).reverse().forEach((d, k) =>
+                  text(svg, right - (k + 0.5) * c, rowTop + r * c + c * 0.85, d, { "text-anchor": "middle" }),
+                );
+              putRight(p.a, 0);
+              putRight(p.b, 1);
+              text(svg, right - (width + 0.5) * c, rowTop + c + c * 0.85, OPS[p.op], { "text-anchor": "middle" });
+              el("line", { x1: right - (width + 1) * c + c * 0.2, x2: right, y1: rowTop + 2 * c, y2: rowTop + 2 * c, stroke: "#1f2a44", "stroke-width": 0.35 }, svg);
+              continue;
+            }
+
+            const base = top + (row * pitch + (column ? 0 : 1)) * c + c * 0.85;
+            label(svg, x0 + c * 0.1, base, n);
+            let x = x0 + c * 1.6;
+            const gap = c * 0.3;
+            const tokens = [
+              p.missing === "a" ? null : String(p.a),
+              OPS[p.op],
+              p.missing === "b" ? null : String(p.b),
+              "=",
+              p.missing === "res" ? null : String(p.res),
+            ];
+            for (const t of tokens) {
+              if (t === null) {
+                const w = Math.max(2, String(answerOf(p)).length + 1) * c * 0.6;
+                blank(svg, x, base, w);
+                x += w + gap;
+              } else {
+                text(svg, x, base, t);
+                x += P.widthMm(t, font, size) + gap;
+              }
+            }
+            if (x - gap > x0 + colCells * c) overflow = true;
+          }
+          sheets.push(svg);
+        }
+
+        const physical = P.present($("preview"), sheets, state);
+        const sheetNote = state.paper === "2A5" ? ` (${physical} A4 sheet${physical > 1 ? "s" : ""})` : "";
+        $("stats").textContent =
+          `${perPage} problems per page · pages: ${sheets.length}${sheetNote}` +
+          (overflow ? " · some problems are too wide: use fewer columns or smaller digits" : "");
+      }
+
+      let raf = 0;
+      function scheduleRender() {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(render);
+      }
+
+      let fontsReady = false;
+      syncControls();
+      render();
+      P.fontsLoaded([...$("font").options].map((o) => o.value), "0123456789+−×÷=").then(scheduleRender);
+      P.customFonts({
+        select: $("font"),
+        file: $("font-file"),
+        clear: $("font-clear"),
+        onPick: (font) => set({ font }),
+        fallbackFont: () => "Andika",
+      }).then(() => {
+        fontsReady = true;
+        syncControls();
+        scheduleRender();
+      });
+    </script>
+  </body>
+</html>

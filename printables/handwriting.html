@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printables · Handwriting</title>
+    <link href="fonts.css" rel="stylesheet" />
+    <link href="app.css" rel="stylesheet" />
+    <style>
+      /* Optional local-only font, gitignored; on the published site the file is absent. */
+      @font-face {
+        font-family: "Прописи";
+        src: url(fonts/PropisiModern.woff2) format("woff2");
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <a class="back" href="./">← Printables</a>
+        <h1>Handwriting</h1>
+        <p class="sub">Tracing sheets for letters, words and sentences.</p>
+
+        <div class="seg" id="script" style="margin-bottom: 12px">
+          <button type="button" data-v="ru">Russian</button>
+          <button type="button" data-v="ka">Georgian</button>
+          <button type="button" data-v="zh">Chinese</button>
+        </div>
+
+        <fieldset>
+          <legend>Ready-made texts</legend>
+          <label for="level">Difficulty</label>
+          <select id="level"></select>
+          <p class="hint" id="level-hint"></p>
+          <div class="actions" style="margin-top: 8px">
+            <button class="btn ghost" id="apply-rec" type="button">Restore recommended settings</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Text</legend>
+          <textarea id="text" spellcheck="false"></textarea>
+          <p class="hint">Each line becomes its own exercise block.</p>
+          <label class="check"><input type="checkbox" id="repeat" /> <span id="repeat-label"></span></label>
+        </fieldset>
+
+        <fieldset id="paper-box"></fieldset>
+
+        <fieldset>
+          <legend>Ruling</legend>
+          <div class="seg" id="ruling"></div>
+          <div id="line-opts">
+            <label for="h">Lowercase letter height <button class="rec" data-key="h" type="button"></button></label>
+            <div class="num"><input type="range" id="h" min="3" max="16" step="0.5" /><output></output></div>
+            <div id="slant-opts">
+              <label for="angle">Slant angle <button class="rec" data-key="angle" type="button"></button></label>
+              <div class="num"><input type="range" id="angle" min="55" max="90" step="1" /><output></output></div>
+              <label for="step">Slant line spacing <button class="rec" data-key="step" type="button"></button></label>
+              <div class="num"><input type="range" id="step" min="2" max="30" step="0.5" /><output></output></div>
+            </div>
+          </div>
+          <div id="cell-opts">
+            <label for="cell">Cell size <button class="rec" data-key="cell" type="button"></button></label>
+            <div class="num"><input type="range" id="cell" min="8" max="30" step="0.5" /><output></output></div>
+            <label class="check"><input type="checkbox" id="pinyin" /> Pinyin lines above cells</label>
+          </div>
+          <label for="lineColor">Line colour</label>
+          <input type="color" id="lineColor" style="width: 48px; height: 32px; padding: 0" />
+        </fieldset>
+
+        <fieldset>
+          <legend>Writing</legend>
+          <label for="font">Font</label>
+          <select id="font"></select>
+          <div class="actions" style="margin-top: 8px">
+            <label class="btn ghost">
+              Upload your own font
+              <input type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2" hidden />
+            </label>
+            <button class="btn ghost" id="font-clear" type="button" hidden>Remove yours</button>
+          </div>
+          <p class="hint">TTF, OTF or WOFF. Stays in this browser only.</p>
+          <label>Tracing style</label>
+          <div class="seg" id="style">
+            <button type="button" data-v="gray">Grey</button>
+            <button type="button" data-v="dots">Dotted</button>
+            <button type="button" data-v="solid">Solid</button>
+          </div>
+          <label class="check"><input type="checkbox" id="sample" /> Solid model at the start of each block</label>
+          <label for="traces"><span id="traces-label"></span> <button class="rec" data-key="traces" type="button"></button></label>
+          <div class="num"><input type="range" id="traces" min="0" max="12" step="1" /><output></output></div>
+          <label for="empties">Empty rows <button class="rec" data-key="empties" type="button"></button></label>
+          <div class="num"><input type="range" id="empties" min="0" max="8" step="1" /><output></output></div>
+          <label class="check"><input type="checkbox" id="fill" /> Fill the rest of the page with empty rows</label>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn" id="print" type="button">Print / PDF</button>
+        </div>
+        <p class="hint">For a PDF choose “Save as PDF” in the print dialog, scale 100%, no margins.</p>
+        <p class="stats" id="stats"></p>
+      </aside>
+      <main id="preview"></main>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+      const { $, el, round05 } = P;
+
+      // ---------- scripts and ready-made texts ----------
+      // Each level carries recommended settings tuned for A4; A5 is derived in recommended().
+      const SLANT = { ruling: "slant", font: "Bad Script", style: "gray", angle: 65 };
+      const KA = { ruling: "line", font: "Noto Sans Georgian", style: "gray", angle: 90 };
+      const ZH = { ruling: "tian", font: "LXGW WenKai", style: "gray", pinyin: true };
+
+      const SCRIPTS = {
+        ru: {
+          engine: "line",
+          probe: "х",
+          sampleText: "АаБбмх",
+          fallback: "cursive",
+          rulings: [["slant", "Slanted"], ["line", "Lines"], ["grid", "Squares"], ["none", "None"]],
+          fonts: [
+            ["Cursive (joined)", [
+              ["Bad Script"], ["Marck Script"], ["Great Vibes", "Great Vibes — calligraphy"],
+              ["Comforter", "Comforter — thin"], ["Comforter Brush", "Comforter Brush — brush"],
+              ["Lobster", "Lobster — bold"], ["Pacifico", "Pacifico — rounded"], ["Pattaya"],
+            ]],
+            ["Handwritten print", [
+              ["Caveat"], ["Neucha"], ["Pangolin", "Pangolin — for kids"], ["Playpen Sans", "Playpen Sans — for kids"],
+              ["Shantell Sans"], ["Balsamiq Sans"], ["Amatic SC", "Amatic SC — capitals"],
+            ]],
+            ["Print", [["Andika", "Andika — for early readers"]]],
+          ],
+          levels: [
+            {
+              label: "Printed vowels",
+              hint: "Large printed letters, dotted tracing, no slant.",
+              text: "А О У\nЫ Э И\nа о у ы э и",
+              base: { h: 13, ruling: "line", font: "Andika", style: "dots", angle: 90, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "Cursive vowels",
+              hint: "First joined letters on a large slanted line.",
+              text: "Аа\nОо\nУу\nИи\nЫы",
+              base: { ...SLANT, h: 10, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "Simple consonants",
+              hint: "Letters made of familiar loops and hooks.",
+              text: "Мм\nЛл\nНн\nРр\nТт\nПп",
+              base: { ...SLANT, h: 9, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "Syllables",
+              hint: "Joining letters in open syllables.",
+              text: "ма мо му мы\nла ло лу лы\nна но ну ны\nра ро ру ры",
+              base: { ...SLANT, h: 8, repeat: true, traces: 2, empties: 1 },
+            },
+            {
+              label: "Tricky letters",
+              hint: "Letters with upper and lower loops.",
+              text: "Дд Зз\nЖж Фф\nЩщ Цц\nЁё Йй\nЪъ Ьь",
+              base: { ...SLANT, h: 8, repeat: true, traces: 2, empties: 2 },
+            },
+            {
+              label: "Short words",
+              hint: "Two-syllable words made of open syllables.",
+              text: "мама папа\nрука нога\nлиса коза\nдом кот сад",
+              base: { ...SLANT, h: 7, repeat: true, traces: 2, empties: 2 },
+            },
+            {
+              label: "Long words",
+              hint: "Consonant clusters and harder joins.",
+              text: "школа тетрадь\nсобака машина\nсемья ёжик\nщука чайка",
+              base: { ...SLANT, h: 6, repeat: false, traces: 2, empties: 2 },
+            },
+            {
+              label: "Short phrases",
+              hint: "Capital letter at the start, full stop at the end.",
+              text: "Это дом.\nУ Тани кот.\nМама шьёт.\nЛиса в лесу.",
+              base: { ...SLANT, h: 5, repeat: false, traces: 1, empties: 2 },
+            },
+            {
+              label: "Sentences",
+              hint: "4 mm line, like a Russian school exercise book.",
+              text: "Мама мыла раму.\nЛиса живёт в густом лесу.\nМы идём в школу.\nЗимой дети катаются на санках.",
+              base: { ...SLANT, h: 4, repeat: false, traces: 1, empties: 2 },
+            },
+            {
+              label: "Tongue twisters",
+              hint: "Connected text for fluent writing on plain lines.",
+              text: "Шла Саша по шоссе и сосала сушку.\nНа дворе трава, на траве дрова.\nКарл у Клары украл кораллы.\nКлара у Карла украла кларнет.\nОт топота копыт пыль по полю летит.\nЕхал Грека через реку, видит в реке рак.\nКукушка кукушонку купила капюшон.\nУ ежа ежата, у ужа ужата.\nСшит колпак не по-колпаковски.\nБык тупогуб, тупогубенький бычок.\nМама мыла Милу мылом, Мила мыло не любила.\nХохлатые хохотушки хохотом хохотали.",
+              base: { ...SLANT, ruling: "line", h: 3.5, repeat: false, traces: 1, empties: 2 },
+            },
+          ],
+        },
+        ka: {
+          engine: "line",
+          probe: "ა",
+          sampleText: "აბგდ",
+          fallback: '"Noto Sans Georgian", Andika, sans-serif',
+          rulings: [["line", "Lines"], ["slant", "Slanted"], ["none", "None"]],
+          fonts: [
+            ["Georgian", [["Noto Sans Georgian", "Noto Sans Georgian — print"], ["Noto Serif Georgian", "Noto Serif Georgian — serif"]]],
+          ],
+          levels: [
+            {
+              label: "Vowels",
+              hint: "The five vowels, large and upright.",
+              text: "ა\nე\nი\nო\nუ",
+              base: { ...KA, h: 10, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "First consonants",
+              hint: "Round letters that sit on the line.",
+              text: "ბ\nგ\nდ\nვ\nზ",
+              base: { ...KA, h: 9, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "More consonants",
+              hint: "Three letters per line.",
+              text: "თ კ ლ\nმ ნ პ\nჟ რ ს",
+              base: { ...KA, h: 9, repeat: true, traces: 3, empties: 1 },
+            },
+            {
+              label: "Tall and deep letters",
+              hint: "Letters with ascenders and descenders.",
+              text: "ტ ფ ქ\nღ ყ შ\nჩ ც ძ\nწ ჭ ხ\nჯ ჰ",
+              base: { ...KA, h: 8, repeat: true, traces: 2, empties: 1 },
+            },
+            {
+              label: "Syllables",
+              hint: "Consonant + vowel pairs.",
+              text: "მა მე მი მო მუ\nბა ბე ბი ბო ბუ\nლა ლე ლი ლო ლუ",
+              base: { ...KA, h: 8, repeat: true, traces: 2, empties: 1 },
+            },
+            {
+              label: "Short words",
+              hint: "Everyday two-syllable words.",
+              text: "დედა მამა\nკატა სახლი\nწყალი პური",
+              base: { ...KA, h: 7, repeat: true, traces: 2, empties: 2 },
+            },
+            {
+              label: "Longer words",
+              hint: "Words with consonant clusters.",
+              text: "მეგობარი\nსკოლა წიგნი\nფანჯარა ბაღი\nბებია ბაბუა",
+              base: { ...KA, h: 6, repeat: false, traces: 2, empties: 2 },
+            },
+            {
+              label: "Short phrases",
+              hint: "Two or three words with a full stop.",
+              text: "ეს სახლია.\nკატა თამაშობს.\nმე მიყვარს დედა.",
+              base: { ...KA, h: 5, repeat: false, traces: 1, empties: 2 },
+            },
+            {
+              label: "Sentences",
+              hint: "Full sentences on a smaller line.",
+              text: "დღეს მზიანი ამინდია.\nბავშვები სკოლაში მიდიან.\nმე ვსწავლობ ქართულ ანბანს.",
+              base: { ...KA, h: 4.5, repeat: false, traces: 1, empties: 2 },
+            },
+            {
+              label: "Connected text",
+              hint: "Greetings and sayings for fluent writing.",
+              text: "გამარჯობა, ჩემო მეგობარო!\nსაქართველო ლამაზი ქვეყანაა.\nწიგნი ცოდნის წყაროა.",
+              base: { ...KA, h: 4, repeat: false, traces: 1, empties: 2 },
+            },
+          ],
+        },
+        zh: {
+          engine: "cell",
+          sampleText: "永字八法",
+          fallback: '"LXGW WenKai", serif',
+          rulings: [["tian", "田 grid"], ["mi", "米 grid"], ["square", "Squares"], ["none", "None"]],
+          fonts: [
+            ["Chinese", [["LXGW WenKai", "LXGW WenKai — kaishu (school style)"], ["Ma Shan Zheng", "Ma Shan Zheng — brush"]]],
+          ],
+          levels: [
+            {
+              label: "Basic strokes",
+              hint: "Single strokes in large 田 cells.",
+              text: "一\n丨\n丿\n丶\n乙",
+              base: { ...ZH, cell: 20, repeat: true, traces: 5, empties: 0 },
+            },
+            {
+              label: "Numbers",
+              hint: "一 to 十, one row per character.",
+              text: "一二三四五\n六七八九十",
+              base: { ...ZH, cell: 18, repeat: true, traces: 4, empties: 0 },
+            },
+            {
+              label: "First characters",
+              hint: "Pictographic characters with few strokes.",
+              text: "人口大小山\n水火木日月",
+              base: { ...ZH, cell: 18, repeat: true, traces: 4, empties: 0 },
+            },
+            {
+              label: "Nature and body",
+              hint: "Common characters, still one row each.",
+              text: "天地上下中土\n手足目耳",
+              base: { ...ZH, cell: 16, repeat: true, traces: 4, empties: 0 },
+            },
+            {
+              label: "Family and pronouns",
+              hint: "Characters with radicals: 女, 亻, 爫.",
+              text: "爸妈我你他\n她们好家爱",
+              base: { ...ZH, cell: 16, repeat: true, traces: 3, empties: 0 },
+            },
+            {
+              label: "First words",
+              hint: "Two-character words: model, trace, write.",
+              text: "你好\n谢谢\n再见\n老师\n学生\n朋友",
+              base: { ...ZH, cell: 15, repeat: false, traces: 2, empties: 1 },
+            },
+            {
+              label: "More words",
+              hint: "Places, time and feelings.",
+              text: "中国\n北京\n学校\n喜欢\n今天\n明天",
+              base: { ...ZH, cell: 14, repeat: false, traces: 2, empties: 1 },
+            },
+            {
+              label: "Short phrases",
+              hint: "Three to four characters per phrase.",
+              text: "我爱妈妈\n你好吗\n我是学生",
+              base: { ...ZH, cell: 14, repeat: false, traces: 2, empties: 1 },
+            },
+            {
+              label: "Sentences",
+              hint: "Full sentences with punctuation.",
+              text: "今天天气很好。\n我喜欢学习中文。",
+              base: { ...ZH, cell: 12, repeat: false, traces: 1, empties: 1 },
+            },
+            {
+              label: "Poem: 静夜思",
+              hint: "Li Bai’s “Quiet Night Thought”.",
+              text: "床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。",
+              base: { ...ZH, cell: 12, repeat: false, traces: 1, empties: 1 },
+            },
+          ],
+        },
+      };
+
+      // Pinyin for the characters used in the ready-made Chinese texts.
+      const PINYIN = Object.fromEntries(
+        ("一yī 丨shù 丿piě 丶diǎn 乙yǐ 二èr 三sān 四sì 五wǔ 六liù 七qī 八bā 九jiǔ 十shí 人rén 口kǒu 大dà 小xiǎo " +
+          "山shān 水shuǐ 火huǒ 木mù 日rì 月yuè 手shǒu 足zú 目mù 耳ěr 天tiān 地dì 上shàng 下xià 中zhōng 土tǔ " +
+          "爸bà 妈mā 我wǒ 你nǐ 他tā 她tā 们men 好hǎo 家jiā 爱ài 谢xiè 再zài 见jiàn 老lǎo 师shī 学xué 生shēng " +
+          "朋péng 友yǒu 国guó 北běi 京jīng 校xiào 喜xǐ 欢huān 今jīn 明míng 吗ma 是shì 气qì 很hěn 习xí 文wén " +
+          "床chuáng 前qián 光guāng 疑yí 霜shuāng 举jǔ 头tóu 望wàng 低dī 思sī 故gù 乡xiāng")
+          .split(" ")
+          .map((p) => [[...p][0], [...p].slice(1).join("")]),
+      );
+
+      const RANGES = {
+        line: { h: "mm", angle: "°", step: "mm", traces: "", empties: "" },
+        cell: { cell: "mm", traces: "", empties: "" },
+      };
+      const SHARED_KEYS = ["paper", "orient", "namefield", "datefield", "holes"];
+
+      function recommended(sc, level, paper) {
+        const cfg = SCRIPTS[sc];
+        const b = cfg.levels[level].base;
+        const small = P.isSmall(paper);
+        // A5 fits fewer rows, so drop one empty row per block to keep more blocks on a page.
+        const empties = small && b.empties > 1 ? b.empties - 1 : b.empties;
+        if (cfg.engine === "cell") return { ...b, empties, cell: small ? round05(b.cell * 0.8) : b.cell };
+        // On A5 the line is ~30% shorter, so letters shrink a bit to keep whole words on one line.
+        const h = small ? Math.max(3, round05(b.h * 0.85)) : b.h;
+        return { ...b, h, empties, step: round05(Math.max(3, h * 1.5)) };
+      }
+
+      // ---------- state ----------
+      const q = new URLSearchParams(location.search);
+      let script = SCRIPTS[q.get("script")] ? q.get("script") : P.load("printables.hw.script") || "ru";
+      const paper = P.loadPaper();
+      let state = loadScriptState(script);
+      {
+        // Options in the URL win over saved ones; a different level starts from that level's defaults.
+        const fromUrl = P.readUrl(state);
+        if (!SCRIPTS[script].levels[fromUrl.level]) delete fromUrl.level;
+        if ("level" in fromUrl && fromUrl.level !== state.level) state = loadScriptState(script, fromUrl.level);
+        state = { ...state, ...fromUrl };
+        P.writeUrl(state, { script });
+      }
+
+      function loadScriptState(sc, forceLevel) {
+        let saved = P.load("printables.hw." + sc);
+        if (forceLevel !== undefined) saved = null;
+        const level = forceLevel ?? (saved && SCRIPTS[sc].levels[saved.level] ? saved.level : 1);
+        const base = {
+          level,
+          text: SCRIPTS[sc].levels[level].text,
+          title: "",
+          sample: true,
+          fill: true,
+          lineColor: "#7a9cc6",
+          ...recommended(sc, level, paper.paper),
+        };
+        return { ...base, ...(saved && SCRIPTS[sc].levels[saved.level] ? saved : {}), ...paper };
+      }
+
+      function persist() {
+        const own = { ...state };
+        for (const k of SHARED_KEYS) delete own[k];
+        P.save("printables.hw." + script, own);
+        P.save("printables.hw.script", script);
+        P.savePaper(state);
+        P.writeUrl(state, { script });
+      }
+
+      function set(patch) {
+        if ("paper" in patch && P.isSmall(patch.paper) !== P.isSmall(state.paper)) {
+          // Switching between A4 and A5-sized pages re-derives size-dependent recommendations.
+          const rec = recommended(script, state.level, patch.paper);
+          patch = { ...pickSizeKeys(rec), ...patch };
+        }
+        state = { ...state, ...patch };
+        for (const k of SHARED_KEYS) paper[k] = state[k];
+        persist();
+        syncControls();
+        scheduleRender();
+      }
+
+      const pickSizeKeys = (rec) =>
+        Object.fromEntries(["h", "step", "cell", "empties"].filter((k) => k in rec).map((k) => [k, rec[k]]));
+
+      // ---------- controls ----------
+      const cfg = () => SCRIPTS[script];
+      const fontSel = $("font");
+      let localPropisi = false;
+      let fontsReady = false;
+
+      function buildScriptUi() {
+        const levelSel = $("level");
+        levelSel.replaceChildren(...cfg().levels.map((l, i) => new Option(`${i + 1}. ${l.label}`, i)));
+
+        $("ruling").innerHTML = cfg()
+          .rulings.map(([v, l]) => `<button type="button" data-v="${v}">${l}</button>`)
+          .join("");
+
+        fontSel.querySelectorAll("[data-builtin]").forEach((g) => g.remove());
+        const groups = cfg().fonts.map(([label, list], gi) => {
+          const g = document.createElement("optgroup");
+          g.label = label;
+          g.dataset.builtin = "";
+          for (const [v, l] of list) g.appendChild(new Option(l || v, v));
+          if (gi === 0 && script === "ru" && localPropisi) g.prepend(new Option("Прописи — school cursive (local)", "Прописи"));
+          return g;
+        });
+        fontSel.prepend(...groups);
+
+        const cellMode = cfg().engine === "cell";
+        $("line-opts").hidden = cellMode;
+        $("cell-opts").hidden = !cellMode;
+        $("repeat-label").textContent = cellMode ? "One row per character" : "Repeat to the end of the line";
+        document.documentElement.lang = { ru: "ru", ka: "ka", zh: "zh" }[script];
+      }
+
+      function syncControls() {
+        const c = cfg();
+        $("level").value = state.level;
+        $("level-hint").textContent = c.levels[state.level].hint;
+        if ($("text").value !== state.text) $("text").value = state.text;
+        $("text").style.fontFamily = fontFamily();
+        // Before stored fonts are registered a saved custom font is simply not listed yet.
+        if (fontsReady && ![...fontSel.options].some((o) => o.value === state.font)) state.font = c.levels[state.level].base.font;
+        fontSel.value = state.font;
+        $("lineColor").value = state.lineColor;
+        for (const k of ["repeat", "sample", "fill", "pinyin"]) $(k).checked = !!state[k];
+        segSyncs.forEach((f) => f());
+        paperSync();
+
+        const rec = recommended(script, state.level, state.paper);
+        for (const [k, unit] of Object.entries(RANGES[c.engine])) {
+          const input = $(k);
+          input.value = state[k];
+          input.nextElementSibling.textContent = String(state[k]).replace(".", ",") + (unit ? " " + unit : "");
+          const btn = document.querySelector(`.rec[data-key="${k}"]`);
+          btn.hidden = Number(state[k]) === rec[k];
+          btn.textContent = `rec. ${rec[k]}${unit ? " " + unit : ""}`;
+        }
+        $("slant-opts").hidden = state.ruling !== "slant";
+        $("traces-label").textContent =
+          c.engine === "cell" && state.repeat ? "Trace cells per character" : "Trace rows";
+      }
+
+      const segSyncs = [
+        P.bindSeg($("script"), () => script, (v) => switchScript(v)),
+        P.bindSeg($("ruling"), () => state.ruling, (v) => set({ ruling: v })),
+        P.bindSeg($("style"), () => state.style, (v) => set({ style: v })),
+      ];
+      const paperSync = P.paperBox($("paper-box"), new Proxy({}, { get: (_, k) => state[k] }), set);
+
+      for (const k of ["h", "angle", "step", "cell", "traces", "empties"])
+        $(k).addEventListener("input", (e) => set({ [k]: Number(e.target.value) }));
+      for (const k of ["repeat", "sample", "fill", "pinyin"])
+        $(k).addEventListener("change", (e) => set({ [k]: e.target.checked }));
+      $("text").addEventListener("input", (e) => set({ text: e.target.value }));
+      $("lineColor").addEventListener("input", (e) => set({ lineColor: e.target.value }));
+      fontSel.addEventListener("change", () => set({ font: fontSel.value }));
+      $("level").addEventListener("change", (e) => {
+        const level = Number(e.target.value);
+        set({ level, text: cfg().levels[level].text, ...recommended(script, level, state.paper) });
+      });
+      $("apply-rec").addEventListener("click", () => set(recommended(script, state.level, state.paper)));
+      document.querySelectorAll(".rec").forEach((b) =>
+        b.addEventListener("click", (e) => {
+          e.preventDefault();
+          set({ [b.dataset.key]: recommended(script, state.level, state.paper)[b.dataset.key] });
+        }),
+      );
+      $("print").addEventListener("click", () => window.print());
+
+      function switchScript(sc) {
+        if (sc === script) return;
+        persist();
+        script = sc;
+        state = loadScriptState(sc);
+        buildScriptUi();
+        persist();
+        syncControls();
+        scheduleRender();
+        loadFonts();
+      }
+
+      const fontFamily = () => `"${state.font}", ${cfg().fallback}`;
+
+      // ---------- shared drawing ----------
+      function textStyle(kind, strokeW, dotGap) {
+        if (kind === "solid") return { fill: "#1f2a44" };
+        if (kind === "gray") return { fill: "#c4c4c4" };
+        return {
+          fill: "none",
+          stroke: "#7d7d7d",
+          "stroke-width": strokeW,
+          "stroke-dasharray": `0.01 ${dotGap}`,
+          "stroke-linecap": "round",
+        };
+      }
+
+      const isEmpty = (row) => (Array.isArray(row) ? row.length === 0 : !row.text);
+
+      function paginate(blocks, perPage, emptyRow) {
+        const pages = [[]];
+        for (const block of blocks) {
+          let page = pages[pages.length - 1];
+          // Keep a block on one page when it would fit on a fresh one.
+          if (page.length && page.length + block.length > perPage && block.length <= perPage) pages.push((page = []));
+          for (const row of block) {
+            if (page.length >= perPage) {
+              // Don't start a new page with a block's leftover empty rows.
+              if (isEmpty(row)) continue;
+              pages.push((page = []));
+            }
+            page.push(row);
+          }
+        }
+        if (state.fill) for (const p of pages) while (p.length < perPage) p.push(emptyRow());
+        return pages;
+      }
+
+      // ---------- line engine (Russian, Georgian) ----------
+      function wrap(text, avail, size) {
+        const out = [];
+        let cur = "";
+        const w = (s) => P.widthMm(s, state.font, size);
+        for (const word of text.split(/\s+/).filter(Boolean)) {
+          const next = cur ? cur + " " + word : word;
+          if (w(next) <= avail) cur = next;
+          else {
+            if (cur) out.push(cur);
+            cur = word;
+            while (w(cur) > avail && cur.length > 1) {
+              let i = cur.length - 1;
+              while (i > 1 && w(cur.slice(0, i)) > avail) i--;
+              out.push(cur.slice(0, i));
+              cur = cur.slice(i);
+            }
+          }
+        }
+        if (cur) out.push(cur);
+        return out;
+      }
+
+      function fillRow(chunk, avail, size) {
+        const sep = chunk.length <= 3 ? "   " : "    ";
+        let s = chunk;
+        while (P.widthMm(s + sep + chunk, state.font, size) <= avail) s += sep + chunk;
+        return s;
+      }
+
+      function drawLineRuling(svg, g, L, top, count) {
+        const x1 = g.left, x2 = g.right;
+        const grp = el("g", { stroke: state.lineColor, fill: "none" }, svg);
+        if (state.ruling === "none") return;
+        if (state.ruling === "grid") {
+          const bottom = top + count * L.pitch;
+          for (let y = top; y <= bottom + 0.01; y += L.h)
+            el("line", { x1, x2, y1: y, y2: y, "stroke-width": 0.15, "stroke-opacity": 0.7 }, grp);
+          for (let x = x1; x <= x2 + 0.01; x += L.h)
+            el("line", { x1: x, x2: x, y1: top, y2: bottom, "stroke-width": 0.15, "stroke-opacity": 0.7 }, grp);
+          return;
+        }
+        for (let r = 0; r < count; r++) {
+          const auxTop = top + r * L.pitch, xTop = auxTop + L.asc, base = xTop + L.h, auxBot = base + L.desc;
+          const line = (y, w, extra = {}) => el("line", { x1, x2, y1: y, y2: y, "stroke-width": w, ...extra }, grp);
+          if (state.ruling === "slant") {
+            line(auxTop, 0.15, { "stroke-opacity": 0.55 });
+            line(xTop, 0.25);
+            line(base, 0.3);
+            line(auxBot, 0.15, { "stroke-opacity": 0.55 });
+            const dx = (auxBot - auxTop) / Math.tan((state.angle * Math.PI) / 180);
+            for (let x = x1; x + dx <= x2; x += state.step)
+              el("line", { x1: x, y1: auxBot, x2: x + dx, y2: auxTop, "stroke-width": 0.12, "stroke-opacity": 0.6 }, grp);
+          } else {
+            line(auxTop, 0.12, { "stroke-opacity": 0.45 });
+            line(xTop, 0.2, { "stroke-dasharray": "1.2 1", "stroke-opacity": 0.7 });
+            line(base, 0.3);
+            line(auxBot, 0.12, { "stroke-opacity": 0.45 });
+          }
+        }
+      }
+
+      function renderLines() {
+        const g = P.geometry(state);
+        const h = state.h;
+        const L = state.ruling === "grid"
+          ? { h, asc: h, desc: h, pitch: 3 * h }
+          : { h, asc: h * 0.8, desc: h * 0.8, pitch: h * 2.6 + Math.max(2, h * 0.6) };
+        const size = h / P.glyphRatio(state.font, cfg().probe, 0.45);
+        const indent = Math.max(2, h * 0.5);
+        const avail = g.right - g.left - 2 * indent;
+
+        const blocks = [];
+        for (const line of state.text.split("\n").map((l) => l.trim()).filter(Boolean)) {
+          for (const chunk of wrap(line, avail, size)) {
+            const t = state.repeat ? fillRow(chunk, avail, size) : chunk;
+            const rows = [];
+            if (state.sample) rows.push({ text: t, kind: "solid" });
+            for (let i = 0; i < state.traces; i++) rows.push({ text: t, kind: state.style });
+            for (let i = 0; i < state.empties; i++) rows.push({ text: "" });
+            if (rows.length) blocks.push(rows);
+          }
+        }
+        const top = g.top + g.headerH;
+        const perPage = Math.max(1, Math.floor((g.bottom - top) / L.pitch));
+        const pages = paginate(blocks, perPage, () => ({ text: "" })).map((rows) => {
+          const svg = P.newPage(g, state, fontFamily());
+          drawLineRuling(svg, g, L, top, rows.length);
+          rows.forEach((row, i) => {
+            if (!row.text) return;
+            el("text", {
+              x: g.left + indent,
+              y: top + i * L.pitch + L.asc + h,
+              "font-family": fontFamily(),
+              "font-size": size,
+              "xml:space": "preserve",
+              ...textStyle(row.kind, Math.max(0.18, h * 0.03), Math.max(0.5, h * 0.09)),
+            }, svg).textContent = row.text;
+          });
+          return svg;
+        });
+        const perRow = Math.floor(avail / P.widthMm(script === "ka" ? "ა" : "а", state.font, size));
+        return { pages, info: `≈ ${perRow} letters per line · ${perPage} lines per page` };
+      }
+
+      // ---------- cell engine (Chinese) ----------
+      function renderCells() {
+        const g = P.geometry(state);
+        const c = state.cell;
+        const py = state.pinyin ? c * 0.5 : 0;
+        const gap = Math.max(2, c * 0.15);
+        const cols = Math.max(1, Math.floor((g.right - g.left) / c));
+        const x0 = g.left + (g.right - g.left - cols * c) / 2;
+        const pitch = py + c + gap;
+        const chunk = (arr) => {
+          const out = [];
+          for (let i = 0; i < arr.length; i += cols) out.push(arr.slice(i, i + cols));
+          return out.length ? out : [[]];
+        };
+
+        const blocks = [];
+        for (const line of state.text.split("\n").map((l) => l.trim()).filter(Boolean)) {
+          const chars = [...line].filter((ch) => !/\s/.test(ch));
+          if (state.repeat) {
+            for (const ch of chars.filter((ch) => !/\p{P}/u.test(ch))) {
+              const cells = [];
+              if (state.sample) cells.push({ ch, kind: "solid" });
+              for (let i = 0; i < state.traces; i++) cells.push({ ch, kind: state.style });
+              const rows = chunk(cells);
+              for (let i = 0; i < state.empties; i++) rows.push([]);
+              blocks.push(rows);
+            }
+          } else {
+            for (const part of chunk(chars)) {
+              const rows = [];
+              if (state.sample) rows.push(part.map((ch) => ({ ch, kind: "solid" })));
+              for (let i = 0; i < state.traces; i++) rows.push(part.map((ch) => ({ ch, kind: state.style })));
+              for (let i = 0; i < state.empties; i++) rows.push([]);
+              if (rows.length) blocks.push(rows);
+            }
+          }
+        }
+
+        const top = g.top + g.headerH;
+        const perPage = Math.max(1, Math.floor((g.bottom - top + gap) / pitch));
+        const color = state.lineColor;
+        const pages = paginate(blocks, perPage, () => []).map((rows) => {
+          const svg = P.newPage(g, state, fontFamily());
+          rows.forEach((row, r) => {
+            const y = top + r * pitch;
+            const grp = el("g", { stroke: color, fill: "none" }, svg);
+            const w = cols * c;
+            if (py)
+              for (let i = 0; i < 4; i++)
+                el("line", { x1: x0, x2: x0 + w, y1: y + (i * py) / 3, y2: y + (i * py) / 3, "stroke-width": i % 3 ? 0.12 : 0.18, "stroke-opacity": 0.7 }, grp);
+            const cy = y + py;
+            if (state.ruling !== "none") {
+              el("rect", { x: x0, y: cy, width: w, height: c, "stroke-width": 0.3 }, grp);
+              for (let i = 1; i < cols; i++) el("line", { x1: x0 + i * c, x2: x0 + i * c, y1: cy, y2: cy + c, "stroke-width": 0.3 }, grp);
+              const guide = { "stroke-width": 0.12, "stroke-dasharray": "1 0.8", "stroke-opacity": 0.8 };
+              if (state.ruling !== "square") {
+                el("line", { x1: x0, x2: x0 + w, y1: cy + c / 2, y2: cy + c / 2, ...guide }, grp);
+                for (let i = 0; i < cols; i++) {
+                  const x = x0 + i * c;
+                  el("line", { x1: x + c / 2, x2: x + c / 2, y1: cy, y2: cy + c, ...guide }, grp);
+                  if (state.ruling === "mi") {
+                    el("line", { x1: x, y1: cy, x2: x + c, y2: cy + c, ...guide }, grp);
+                    el("line", { x1: x + c, y1: cy, x2: x, y2: cy + c, ...guide }, grp);
+                  }
+                }
+              }
+            }
+            row.forEach((cell, i) => {
+              const cx = x0 + (i + 0.5) * c;
+              el("text", {
+                x: cx,
+                y: cy + c / 2,
+                "text-anchor": "middle",
+                "dominant-baseline": "central",
+                "font-family": fontFamily(),
+                "font-size": c * 0.8,
+                ...textStyle(cell.kind, Math.max(0.2, c * 0.015), Math.max(0.6, c * 0.05)),
+              }, svg).textContent = cell.ch;
+              const pin = py && PINYIN[cell.ch];
+              if (pin)
+                el("text", {
+                  x: cx,
+                  y: y + (2 * py) / 3,
+                  "text-anchor": "middle",
+                  "font-family": "Andika, sans-serif",
+                  "font-size": py * 0.62,
+                  fill: cell.kind === "solid" ? "#1f2a44" : "#b0b0b0",
+                }, svg).textContent = pin;
+            });
+          });
+          return svg;
+        });
+        return { pages, info: `${cols} cells per row · ${perPage} rows per page` };
+      }
+
+      // ---------- render ----------
+      function render() {
+        const { pages, info } = cfg().engine === "cell" ? renderCells() : renderLines();
+        const sheets = P.present($("preview"), pages, state);
+        const sheetNote = state.paper === "2A5" ? ` (${sheets} A4 sheet${sheets > 1 ? "s" : ""})` : "";
+        $("stats").textContent = `${info} · pages: ${pages.length}${sheetNote}`;
+      }
+
+      let raf = 0;
+      function scheduleRender() {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(render);
+      }
+
+      // Fonts arrive asynchronously; metrics change once each one loads.
+      function loadFonts() {
+        const families = cfg().fonts.flatMap(([, list]) => list.map(([v]) => v));
+        P.fontsLoaded(families.concat("Andika"), cfg().sampleText + "āǎ").then(scheduleRender);
+      }
+
+      buildScriptUi();
+      syncControls();
+      render();
+      loadFonts();
+
+      const userFonts = P.customFonts({
+        select: fontSel,
+        file: $("font-file"),
+        clear: $("font-clear"),
+        onPick: (font) => set({ font }),
+        fallbackFont: () => recommended(script, state.level, state.paper).font,
+      });
+      Promise.all([
+        userFonts,
+        document.fonts.load('20px "Прописи"', "Аа").then((f) => (localPropisi = f.length > 0), () => {}),
+      ]).then(() => {
+        fontsReady = true;
+        buildScriptUi();
+        syncControls();
+        scheduleRender();
+      });
+    </script>
+  </body>
+</html>

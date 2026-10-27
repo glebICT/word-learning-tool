@@ -1,808 +1,98 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Генератор прописей</title>
+    <title>Printables</title>
     <link href="fonts.css" rel="stylesheet" />
-    <style>
-      /* Optional local-only font, gitignored; on the published site the file is absent. */
-      @font-face {
-        font-family: "Прописи";
-        src: url(fonts/PropisiModern.woff2) format("woff2");
-      }
-    </style>
-    <style id="page-style">
-      @page { size: A4 portrait; margin: 0; }
-    </style>
-    <style>
-      :root {
-        --bg: #f4f1ea;
-        --panel: #fffdf8;
-        --text: #1d1b16;
-        --muted: #6b665b;
-        --border: #d9d3c5;
-        --accent: #3056d3;
-        --accent-soft: #dfe6fb;
-        --good: #1b7a45;
-        --sheet-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #111318;
-          --panel: #1a1d24;
-          --text: #e9e6df;
-          --muted: #9a968c;
-          --border: #343a46;
-          --accent: #7d9bff;
-          --accent-soft: #232c45;
-          --good: #5fd08f;
-          --sheet-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
-        }
-      }
-      html { color-scheme: light dark; }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: system-ui, sans-serif;
-        font-size: 14px;
-      }
-      .app {
-        display: grid;
-        grid-template-columns: 340px 1fr;
-        min-height: 100vh;
-      }
-      aside {
-        background: var(--panel);
-        border-right: 1px solid var(--border);
-        padding: 16px;
-        overflow-y: auto;
-        max-height: 100vh;
-        position: sticky;
-        top: 0;
-      }
-      h1 { font-size: 20px; margin: 0 0 4px; }
-      .sub { color: var(--muted); margin: 0 0 16px; }
-      fieldset {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        margin: 0 0 12px;
-        padding: 10px 12px 12px;
-      }
-      legend { font-weight: 600; padding: 0 4px; }
-      label { display: block; margin: 8px 0 4px; }
-      .row { display: flex; gap: 8px; align-items: center; }
-      .row > * { flex: 1; }
-      textarea, select, input[type="text"], input[type="number"] {
-        width: 100%;
-        font: inherit;
-        padding: 6px 8px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--bg);
-        color: var(--text);
-      }
-      textarea { min-height: 90px; resize: vertical; font-family: "Bad Script", cursive; font-size: 18px; }
-      .seg { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-      .seg button {
-        flex: 1;
-        border: 0;
-        background: transparent;
-        color: var(--text);
-        padding: 6px 4px;
-        font: inherit;
-        cursor: pointer;
-      }
-      .seg button + button { border-left: 1px solid var(--border); }
-      .seg button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-      .check { display: flex; gap: 6px; align-items: center; margin: 8px 0 0; }
-      .check input { margin: 0; }
-      .num { display: flex; gap: 8px; align-items: center; }
-      .num input[type="range"] { flex: 1; }
-      .num output { width: 54px; text-align: right; font-variant-numeric: tabular-nums; }
-      .rec {
-        display: inline-block;
-        margin-left: 6px;
-        font-size: 12px;
-        color: var(--good);
-        background: none;
-        border: 0;
-        padding: 0;
-        cursor: pointer;
-        text-decoration: underline dotted;
-      }
-      .rec[hidden] { display: none; }
-      .hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
-      .actions { display: flex; gap: 8px; margin-top: 4px; }
-      .btn {
-        flex: 1;
-        font: inherit;
-        font-weight: 600;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid var(--accent);
-        background: var(--accent);
-        color: #fff;
-        cursor: pointer;
-      }
-      .btn.ghost { background: transparent; color: var(--accent); }
-      .stats { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
-      main { padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
-      .sheet {
-        background: #fff;
-        box-shadow: var(--sheet-shadow);
-        width: 100%;
-        height: auto;
-        display: block;
-      }
-      .sheet-wrap { width: 100%; }
-      .sheet-wrap.A4 { max-width: 760px; }
-      .sheet-wrap.A5 { max-width: 560px; }
-      .sheet-wrap.A5.landscape { max-width: 760px; }
-      @media (max-width: 800px) {
-        .app { grid-template-columns: 1fr; }
-        aside { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--border); }
-        main { padding: 16px; }
-      }
-      @media print {
-        aside { display: none; }
-        body { background: #fff; }
-        .app { display: block; }
-        main { padding: 0; gap: 0; display: block; }
-        .sheet-wrap { max-width: none !important; }
-        .sheet { box-shadow: none; width: var(--pw); height: var(--ph); break-after: page; }
-        .sheet-wrap:last-child .sheet { break-after: auto; }
-      }
-    </style>
+    <link href="app.css" rel="stylesheet" />
   </head>
   <body>
-    <div class="app">
-      <aside>
-        <h1>Генератор прописей</h1>
-        <p class="sub">Буквы, слова и фразы для обводки — печать на A4 или A5.</p>
+    <div class="landing">
+      <h1>Printables</h1>
+      <p class="sub">Handwriting and math worksheets to print. Works offline once opened.</p>
 
-        <fieldset>
-          <legend>Готовые тексты</legend>
-          <label for="level">Уровень сложности</label>
-          <select id="level"></select>
-          <p class="hint" id="level-hint"></p>
-          <div class="actions" style="margin-top: 8px">
-            <button class="btn ghost" id="apply-rec" type="button">Вернуть рекомендуемые настройки</button>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Текст</legend>
-          <textarea id="text" spellcheck="false"></textarea>
-          <p class="hint">Каждая строка — отдельный блок упражнений.</p>
-          <label class="check"><input type="checkbox" id="repeat" /> Повторять до конца строки</label>
-        </fieldset>
-
-        <fieldset>
-          <legend>Лист</legend>
-          <label>Формат</label>
-          <div class="seg" id="size">
-            <button type="button" data-v="A4">A4</button>
-            <button type="button" data-v="A5">A5</button>
-          </div>
-          <label>Ориентация</label>
-          <div class="seg" id="orient">
-            <button type="button" data-v="portrait">Книжная</button>
-            <button type="button" data-v="landscape">Альбомная</button>
-          </div>
-          <label for="title">Заголовок</label>
-          <input type="text" id="title" placeholder="Например: Буква А" />
-          <label class="check"><input type="checkbox" id="namefield" /> Поле «Имя»</label>
-          <label class="check"><input type="checkbox" id="datefield" /> Поле «Дата»</label>
-          <label class="check"><input type="checkbox" id="holes" /> Метки для 6 отверстий (кольца)</label>
-          <p class="hint">Шаг 19–19–70–19–19 мм, как у A5-органайзеров. Книжная — слева, альбомная — сверху.</p>
-        </fieldset>
-
-        <fieldset>
-          <legend>Разлиновка</legend>
-          <div class="seg" id="ruling">
-            <button type="button" data-v="slant">Косая</button>
-            <button type="button" data-v="line">Линия</button>
-            <button type="button" data-v="grid">Клетка</button>
-            <button type="button" data-v="none">Нет</button>
-          </div>
-          <label for="h">Высота строчной буквы <button class="rec" data-key="h" type="button"></button></label>
-          <div class="num"><input type="range" id="h" min="3" max="16" step="0.5" /><output for="h"></output></div>
-          <div id="slant-opts">
-            <label for="angle">Угол наклона <button class="rec" data-key="angle" type="button"></button></label>
-            <div class="num"><input type="range" id="angle" min="55" max="90" step="1" /><output for="angle"></output></div>
-            <label for="step">Шаг наклонных <button class="rec" data-key="step" type="button"></button></label>
-            <div class="num"><input type="range" id="step" min="2" max="30" step="0.5" /><output for="step"></output></div>
-          </div>
-          <label for="lineColor">Цвет линий</label>
-          <div class="row">
-            <input type="color" id="lineColor" style="flex: 0 0 48px; height: 32px" />
-            <span></span>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Написание</legend>
-          <label for="font">Шрифт</label>
-          <select id="font">
-            <optgroup label="Прописные (слитные)">
-              <option value="Bad Script">Bad Script</option>
-              <option value="Marck Script">Marck Script</option>
-              <option value="Great Vibes">Great Vibes — каллиграфия</option>
-              <option value="Comforter">Comforter — тонкий</option>
-              <option value="Comforter Brush">Comforter Brush — кисть</option>
-              <option value="Lobster">Lobster — жирный</option>
-              <option value="Pacifico">Pacifico — округлый</option>
-              <option value="Pattaya">Pattaya</option>
-            </optgroup>
-            <optgroup label="Рукописные печатные">
-              <option value="Caveat">Caveat</option>
-              <option value="Neucha">Neucha</option>
-              <option value="Pangolin">Pangolin — детский</option>
-              <option value="Playpen Sans">Playpen Sans — детский</option>
-              <option value="Shantell Sans">Shantell Sans</option>
-              <option value="Balsamiq Sans">Balsamiq Sans</option>
-              <option value="Amatic SC">Amatic SC — заглавные</option>
-            </optgroup>
-            <optgroup label="Печатные">
-              <option value="Andika">Andika — для начального чтения</option>
-            </optgroup>
-            <optgroup label="Свои шрифты" id="custom-fonts" hidden></optgroup>
-          </select>
-          <div class="actions" style="margin-top: 8px">
-            <label class="btn ghost" style="text-align: center">
-              Загрузить свой шрифт
-              <input type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2" hidden />
-            </label>
-            <button class="btn ghost" id="font-clear" type="button" hidden>Удалить свои</button>
-          </div>
-          <p class="hint">TTF, OTF или WOFF — например, школьный шрифт «Прописи». Хранится только в этом браузере.</p>
-          <label>Обводка</label>
-          <div class="seg" id="style">
-            <button type="button" data-v="gray">Серый след</button>
-            <button type="button" data-v="dots">Пунктир</button>
-            <button type="button" data-v="solid">Образец</button>
-          </div>
-          <label class="check"><input type="checkbox" id="sample" /> Строка-образец в начале блока</label>
-          <label for="traces">Строк для обводки <button class="rec" data-key="traces" type="button"></button></label>
-          <div class="num"><input type="range" id="traces" min="0" max="8" step="1" /><output for="traces"></output></div>
-          <label for="empties">Пустых строк <button class="rec" data-key="empties" type="button"></button></label>
-          <div class="num"><input type="range" id="empties" min="0" max="8" step="1" /><output for="empties"></output></div>
-          <label class="check"><input type="checkbox" id="fill" /> Заполнить лист пустыми строками</label>
-        </fieldset>
-
-        <div class="actions">
-          <button class="btn" id="print" type="button">Печать / PDF</button>
+      <section>
+        <h2>1. Paper</h2>
+        <div class="papers" id="papers">
+          <button class="paper-opt" type="button" data-v="A4">
+            <svg viewBox="0 0 64 90"><rect x="2" y="2" width="60" height="86" rx="2" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+            <b>A4</b><span>One page per A4 sheet</span>
+          </button>
+          <button class="paper-opt" type="button" data-v="A5">
+            <svg viewBox="0 0 64 90"><rect x="12" y="16" width="42" height="60" rx="2" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+            <b>A5</b><span>One page per A5 sheet</span>
+          </button>
+          <button class="paper-opt" type="button" data-v="2A5">
+            <svg viewBox="0 0 90 64">
+              <rect x="2" y="2" width="86" height="60" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+              <line x1="45" y1="2" x2="45" y2="62" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+            </svg>
+            <b>2 × A5 on A4</b><span>Two A5 pages per A4 sheet, cut in half</span>
+          </button>
         </div>
-        <p class="hint">Для PDF выберите в окне печати «Сохранить как PDF», масштаб 100%, без полей.</p>
-        <p class="stats" id="stats"></p>
-      </aside>
-      <main id="preview"></main>
+        <div class="seg orient" id="orient">
+          <button type="button" data-v="portrait">Portrait</button>
+          <button type="button" data-v="landscape">Landscape</button>
+        </div>
+        <p class="hint" id="orient-hint"></p>
+      </section>
+
+      <section>
+        <h2>2. Worksheet</h2>
+        <div class="cards">
+          <a class="card" data-href="handwriting.html?script=ru">
+            <div class="glyph" style="font-family: 'Bad Script', cursive">Аа Бб</div>
+            <b>Russian handwriting</b>
+            <span>Cursive прописи on slanted lines, from vowels to tongue twisters.</span>
+          </a>
+          <a class="card" data-href="handwriting.html?script=ka">
+            <div class="glyph" style="font-family: 'Noto Sans Georgian', sans-serif">ა ბ გ</div>
+            <b>Georgian handwriting</b>
+            <span>Mkhedruli letters on four-line ruling, from vowels to sentences.</span>
+          </a>
+          <a class="card" data-href="handwriting.html?script=zh">
+            <div class="glyph" style="font-family: 'LXGW WenKai', serif">永 字</div>
+            <b>Chinese handwriting</b>
+            <span>Characters in 田 and 米 grids with pinyin, from strokes to poems.</span>
+          </a>
+          <a class="card" data-href="math.html">
+            <div class="glyph" style="font-family: Andika, sans-serif">7 + 5</div>
+            <b>Math problems</b>
+            <span>From sums within 10 to column arithmetic and times tables.</span>
+          </a>
+        </div>
+      </section>
     </div>
 
+    <script src="common.js"></script>
     <script>
-      const PAGE = { A4: [210, 297], A5: [148, 210] };
-      const SVGNS = "http://www.w3.org/2000/svg";
+      const paper = P.loadPaper();
 
-      // Ready-made texts from easiest to hardest. Each level carries recommended settings tuned
-      // for A4; A5 is derived in recommended(). Letters get smaller and practice rows fewer as it grows.
-      const SLANT = { ruling: "slant", font: "Bad Script", style: "gray", angle: 65 };
-      const LEVELS = [
-        {
-          label: "Печатные гласные",
-          hint: "Крупные печатные буквы, пунктир, без наклона.",
-          text: "А О У\nЫ Э И\nа о у ы э и",
-          base: { h: 13, ruling: "line", font: "Andika", style: "dots", angle: 90, repeat: true, traces: 3, empties: 1 },
-        },
-        {
-          label: "Прописные гласные",
-          hint: "Первые письменные буквы, крупная косая строка.",
-          text: "Аа\nОо\nУу\nИи\nЫы",
-          base: { ...SLANT, h: 10, repeat: true, traces: 3, empties: 1 },
-        },
-        {
-          label: "Простые согласные",
-          hint: "Буквы из знакомых элементов: петли и крючки.",
-          text: "Мм\nЛл\nНн\nРр\nТт\nПп",
-          base: { ...SLANT, h: 9, repeat: true, traces: 3, empties: 1 },
-        },
-        {
-          label: "Слоги",
-          hint: "Соединение букв в открытых слогах.",
-          text: "ма мо му мы\nла ло лу лы\nна но ну ны\nра ро ру ры",
-          base: { ...SLANT, h: 8, repeat: true, traces: 2, empties: 1 },
-        },
-        {
-          label: "Сложные буквы",
-          hint: "Буквы с верхними и нижними петлями.",
-          text: "Дд Зз\nЖж Фф\nЩщ Цц\nЁё Йй\nЪъ Ьь",
-          base: { ...SLANT, h: 8, repeat: true, traces: 2, empties: 2 },
-        },
-        {
-          label: "Короткие слова",
-          hint: "Двусложные слова из открытых слогов.",
-          text: "мама папа\nрука нога\nлиса коза\nдом кот сад",
-          base: { ...SLANT, h: 7, repeat: true, traces: 2, empties: 2 },
-        },
-        {
-          label: "Длинные слова",
-          hint: "Слова со стечением согласных и сложными соединениями.",
-          text: "школа тетрадь\nсобака машина\nсемья ёжик\nщука чайка",
-          base: { ...SLANT, h: 6, repeat: false, traces: 2, empties: 2 },
-        },
-        {
-          label: "Короткие фразы",
-          hint: "Заглавная буква и точка в конце.",
-          text: "Это дом.\nУ Тани кот.\nМама шьёт.\nЛиса в лесу.",
-          base: { ...SLANT, h: 5, repeat: false, traces: 1, empties: 2 },
-        },
-        {
-          label: "Предложения",
-          hint: "Строка 4 мм — как в школьной тетради в узкую косую.",
-          text: "Мама мыла раму.\nЛиса живёт в густом лесу.\nМы идём в школу.\nЗимой дети катаются на санках.",
-          base: { ...SLANT, h: 4, repeat: false, traces: 1, empties: 2 },
-        },
-        {
-          label: "Скороговорки",
-          hint: "Связный текст для беглого письма, обычная линия.",
-          text: "Шла Саша по шоссе и сосала сушку.\nЕхал Грека через реку, видит Грека — в реке рак.\nНа дворе трава, на траве дрова.\nЧетыре чёрненьких чумазеньких чертёнка чертили чёрными чернилами чертёж.",
-          base: { ...SLANT, ruling: "line", h: 3.5, repeat: false, traces: 1, empties: 2 },
-        },
-      ];
+      const hint = () =>
+        paper.paper === "2A5"
+          ? `Two ${paper.orient} A5 pages side by side on ${paper.orient === "portrait" ? "landscape" : "portrait"} A4.`
+          : "";
 
-      const round05 = (v) => Math.round(v * 2) / 2;
-
-      function recommended(level, size) {
-        const b = LEVELS[level].base;
-        // On A5 the line is ~30% shorter, so letters shrink a bit to keep whole words on one line.
-        const h = size === "A5" ? Math.max(3, round05(b.h * 0.85)) : b.h;
-        // A5 fits fewer rows, so drop one empty row per block to keep more blocks on a page.
-        const empties = size === "A5" && b.empties > 1 ? b.empties - 1 : b.empties;
-        return { ...b, h, empties, step: round05(Math.max(3, h * 1.5)) };
+      function sync() {
+        for (const b of P.$("papers").children) b.classList.toggle("on", b.dataset.v === paper.paper);
+        P.$("orient-hint").textContent = hint();
+        for (const a of document.querySelectorAll(".card"))
+          a.href = `${a.dataset.href}${a.dataset.href.includes("?") ? "&" : "?"}paper=${paper.paper}&orient=${paper.orient}`;
+        P.savePaper(paper);
       }
 
-      const DEFAULTS = {
-        level: 1,
-        text: LEVELS[1].text,
-        size: "A4",
-        orient: "portrait",
-        title: "",
-        namefield: false,
-        datefield: false,
-        holes: false,
-        sample: true,
-        fill: true,
-        lineColor: "#7a9cc6",
-        ...recommended(1, "A4"),
-      };
-
-      let state = { ...DEFAULTS };
-      try {
-        const saved = JSON.parse(localStorage.getItem("propisi") || "null");
-        if (saved && LEVELS[saved.level]) state = { ...state, ...saved };
-      } catch {}
-
-      const $ = (id) => document.getElementById(id);
-
-      // ---------- controls ----------
-      const levelSel = $("level");
-      LEVELS.forEach((l, i) => levelSel.add(new Option(`${i + 1}. ${l.label}`, i)));
-
-      const segs = ["size", "orient", "ruling", "style"];
-      const ranges = { h: "мм", angle: "°", step: "мм", traces: "", empties: "" };
-      const checks = ["repeat", "sample", "fill", "namefield", "datefield", "holes"];
-
-      function syncControls() {
-        levelSel.value = state.level;
-        $("level-hint").textContent = LEVELS[state.level].hint;
-        $("text").value = state.text;
-        $("title").value = state.title;
-        $("font").value = state.font;
-        $("lineColor").value = state.lineColor;
-        for (const s of segs)
-          for (const b of $(s).children) b.classList.toggle("on", b.dataset.v === state[s]);
-        for (const k of checks) $(k).checked = state[k];
-        for (const k in ranges) $(k).value = state[k];
-        syncOutputs();
-      }
-
-      function syncOutputs() {
-        const rec = recommended(state.level, state.size);
-        for (const [k, unit] of Object.entries(ranges)) {
-          $(k).nextElementSibling.textContent = String(state[k]).replace(".", ",") + (unit ? " " + unit : "");
-          const btn = document.querySelector(`.rec[data-key="${k}"]`);
-          btn.hidden = Number(state[k]) === rec[k];
-          btn.textContent = `реком. ${String(rec[k]).replace(".", ",")}${unit ? " " + unit : ""}`;
-        }
-        $("slant-opts").style.display = state.ruling === "slant" ? "" : "none";
-      }
-
-      function set(patch) {
-        state = { ...state, ...patch };
-        try { localStorage.setItem("propisi", JSON.stringify(state)); } catch {}
-        syncOutputs();
-        scheduleRender();
-      }
-
-      for (const s of segs)
-        $(s).addEventListener("click", (e) => {
-          const v = e.target.dataset?.v;
-          if (!v) return;
-          for (const b of $(s).children) b.classList.toggle("on", b === e.target);
-          // Switching paper size re-derives size-dependent recommendations.
-          if (s === "size") set({ size: v, ...pick(recommended(state.level, v), ["h", "step", "empties"]) }), syncControls();
-          else set({ [s]: v });
-        });
-      for (const k in ranges) $(k).addEventListener("input", (e) => set({ [k]: Number(e.target.value) }));
-      for (const k of checks) $(k).addEventListener("change", (e) => set({ [k]: e.target.checked }));
-      for (const k of ["text", "title", "font", "lineColor"])
-        $(k).addEventListener("input", (e) => set({ [k]: e.target.value }));
-      levelSel.addEventListener("change", () => {
-        const level = Number(levelSel.value);
-        set({ level, text: LEVELS[level].text, ...recommended(level, state.size) });
-        syncControls();
+      P.$("papers").addEventListener("click", (e) => {
+        const b = e.target.closest(".paper-opt");
+        if (!b) return;
+        paper.paper = b.dataset.v;
+        sync();
       });
-      $("apply-rec").addEventListener("click", () => {
-        set(recommended(state.level, state.size));
-        syncControls();
+      P.bindSeg(P.$("orient"), () => paper.orient, (v) => {
+        paper.orient = v;
+        sync();
       });
-      document.querySelectorAll(".rec").forEach((b) =>
-        b.addEventListener("click", (e) => {
-          e.preventDefault();
-          const k = b.dataset.key;
-          set({ [k]: recommended(state.level, state.size)[k] });
-          $(k).value = state[k];
-          syncOutputs();
-        }),
-      );
-      $("print").addEventListener("click", () => window.print());
-
-      function pick(o, keys) {
-        return Object.fromEntries(keys.map((k) => [k, o[k]]));
-      }
-
-      // ---------- text measurement ----------
-      const ctx = document.createElement("canvas").getContext("2d");
-      const xRatioCache = {};
-
-      function xRatio(font) {
-        if (!xRatioCache[font]) {
-          ctx.font = `100px "${font}"`;
-          const m = ctx.measureText("х").actualBoundingBoxAscent / 100;
-          xRatioCache[font] = m > 0.2 && m < 0.9 ? m : 0.45;
-        }
-        return xRatioCache[font];
-      }
-
-      function widthMm(str, font, fontMm) {
-        ctx.font = `100px "${font}"`;
-        return (ctx.measureText(str).width / 100) * fontMm;
-      }
-
-      // Split text into chunks that each fit into one row.
-      function wrap(text, avail, font, fontMm) {
-        const out = [];
-        let cur = "";
-        for (const word of text.split(/\s+/).filter(Boolean)) {
-          const next = cur ? cur + " " + word : word;
-          if (widthMm(next, font, fontMm) <= avail) cur = next;
-          else {
-            if (cur) out.push(cur);
-            cur = word;
-            while (widthMm(cur, font, fontMm) > avail && cur.length > 1) {
-              let i = cur.length - 1;
-              while (i > 1 && widthMm(cur.slice(0, i), font, fontMm) > avail) i--;
-              out.push(cur.slice(0, i));
-              cur = cur.slice(i);
-            }
-          }
-        }
-        if (cur) out.push(cur);
-        return out;
-      }
-
-      function fillRow(chunk, avail, font, fontMm) {
-        const sep = chunk.length <= 3 ? "   " : "    ";
-        let s = chunk;
-        while (widthMm(s + sep + chunk, font, fontMm) <= avail) s += sep + chunk;
-        return s;
-      }
-
-      // ---------- layout ----------
-      function geometry() {
-        const [w0, h0] = PAGE[state.size];
-        const [pw, ph] = state.orient === "portrait" ? [w0, h0] : [h0, w0];
-        const margin = state.size === "A4" ? 15 : 10;
-        const h = state.h;
-        let asc, desc, pitch;
-        if (state.ruling === "grid") {
-          asc = desc = h;
-          pitch = 3 * h;
-        } else {
-          asc = desc = h * 0.8;
-          pitch = h + asc + desc + Math.max(2, h * 0.6);
-        }
-        const headerH = state.title || state.namefield || state.datefield ? (state.size === "A4" ? 16 : 13) : 0;
-        // Holes sit 7 mm from the binding edge; keep the ruling clear of them.
-        const holeEdge = state.orient === "portrait" ? "left" : "top";
-        const bind = state.holes ? Math.max(margin, 15) : margin;
-        const left = holeEdge === "left" ? bind : margin;
-        const top = holeEdge === "top" ? bind : margin;
-        return { pw, ph, margin, left, right: pw - margin, top, bottom: ph - margin, holeEdge, h, asc, desc, pitch, headerH };
-      }
-
-      function buildRows(g) {
-        const font = state.font;
-        const fontMm = g.h / xRatio(font);
-        const indent = Math.max(2, g.h * 0.5);
-        const avail = g.right - g.left - 2 * indent;
-        const blocks = [];
-        for (const line of state.text.split("\n").map((l) => l.trim()).filter(Boolean)) {
-          for (const chunk of wrap(line, avail, font, fontMm)) {
-            const t = state.repeat ? fillRow(chunk, avail, font, fontMm) : chunk;
-            const rows = [];
-            if (state.sample) rows.push({ text: t, kind: "solid" });
-            for (let i = 0; i < state.traces; i++) rows.push({ text: t, kind: state.style });
-            for (let i = 0; i < state.empties; i++) rows.push({ text: "", kind: "empty" });
-            if (rows.length) blocks.push(rows);
-          }
-        }
-        return { blocks, fontMm, indent, avail };
-      }
-
-      function paginate(g, blocks) {
-        const usable = g.bottom - g.top - g.headerH;
-        const perPage = Math.max(1, Math.floor(usable / g.pitch));
-        const pages = [[]];
-        for (const block of blocks) {
-          let page = pages[pages.length - 1];
-          // Keep a block on one page when it would fit on a fresh one.
-          if (page.length && page.length + block.length > perPage && block.length <= perPage) {
-            pages.push((page = []));
-          }
-          for (const row of block) {
-            if (page.length >= perPage) pages.push((page = []));
-            page.push(row);
-          }
-        }
-        if (state.fill) for (const p of pages) while (p.length < perPage) p.push({ text: "", kind: "empty" });
-        return { pages, perPage };
-      }
-
-      // ---------- rendering ----------
-      function el(name, attrs, parent) {
-        const n = document.createElementNS(SVGNS, name);
-        for (const k in attrs) n.setAttribute(k, attrs[k]);
-        parent?.appendChild(n);
-        return n;
-      }
-
-      function drawRuling(svg, g, top, rowsCount) {
-        const L = g.left, R = g.right;
-        const color = state.lineColor;
-        const grp = el("g", { stroke: color, fill: "none" }, svg);
-        if (state.ruling === "grid") {
-          const bottom = top + rowsCount * g.pitch;
-          const cell = g.h;
-          for (let y = top; y <= bottom + 0.01; y += cell)
-            el("line", { x1: L, x2: R, y1: y, y2: y, "stroke-width": 0.15, "stroke-opacity": 0.7 }, grp);
-          const cols = Math.floor((R - L) / cell);
-          for (let i = 0; i <= cols; i++) {
-            const x = L + i * cell;
-            el("line", { x1: x, x2: x, y1: top, y2: bottom, "stroke-width": 0.15, "stroke-opacity": 0.7 }, grp);
-          }
-          return;
-        }
-        if (state.ruling === "none") return;
-        for (let r = 0; r < rowsCount; r++) {
-          const yTop = top + r * g.pitch;
-          const auxTop = yTop, xTop = yTop + g.asc, base = xTop + g.h, auxBot = base + g.desc;
-          const line = (y, w, extra = {}) => el("line", { x1: L, x2: R, y1: y, y2: y, "stroke-width": w, ...extra }, grp);
-          if (state.ruling === "slant") {
-            line(auxTop, 0.15, { "stroke-opacity": 0.55 });
-            line(xTop, 0.25);
-            line(base, 0.3);
-            line(auxBot, 0.15, { "stroke-opacity": 0.55 });
-            const dx = (auxBot - auxTop) / Math.tan((state.angle * Math.PI) / 180);
-            for (let x = L; x + dx <= R; x += state.step)
-              el("line", { x1: x, y1: auxBot, x2: x + dx, y2: auxTop, "stroke-width": 0.12, "stroke-opacity": 0.6 }, grp);
-          } else {
-            line(xTop, 0.2, { "stroke-dasharray": "1.2 1", "stroke-opacity": 0.7 });
-            line(base, 0.3);
-          }
-        }
-      }
-
-      // 6-ring planner pattern (A5 Filofax-style): gaps between hole centres in mm.
-      const HOLE_GAPS = [19, 19, 70, 19, 19];
-
-      function drawHoles(svg, g) {
-        if (!state.holes) return;
-        const span = HOLE_GAPS.reduce((a, b) => a + b, 0);
-        const edgeLen = g.holeEdge === "left" ? g.ph : g.pw;
-        let pos = (edgeLen - span) / 2;
-        const grp = el("g", { stroke: "#9a9a9a", fill: "none", "stroke-width": 0.2 }, svg);
-        for (let i = 0; i <= HOLE_GAPS.length; i++) {
-          const [cx, cy] = g.holeEdge === "left" ? [7, pos] : [pos, 7];
-          el("circle", { cx, cy, r: 2.75, "stroke-dasharray": "0.8 0.6" }, grp);
-          el("line", { x1: cx - 1, x2: cx + 1, y1: cy, y2: cy }, grp);
-          el("line", { x1: cx, x2: cx, y1: cy - 1, y2: cy + 1 }, grp);
-          pos += HOLE_GAPS[i] ?? 0;
-        }
-      }
-
-      function drawHeader(svg, g) {
-        if (!g.headerH) return;
-        const y = g.top + g.headerH * 0.55;
-        const fs = state.size === "A4" ? 5 : 4.2;
-        const L = g.left, R = g.right;
-        if (state.title)
-          el("text", { x: L, y, "font-size": fs * 1.25, "font-family": "Bad Script, cursive", fill: "#222" }, svg).textContent = state.title;
-        // Fields are laid out right-to-left so whichever ones are enabled stay flush right.
-        const fields = [
-          state.datefield && ["Дата", state.size === "A4" ? 28 : 22],
-          state.namefield && ["Имя", state.size === "A4" ? 50 : 34],
-        ].filter(Boolean);
-        let x = R;
-        for (const [label, w] of fields) {
-          x -= w + fs * 2.6;
-          el("text", { x, y, "font-size": fs * 0.75, "font-family": "system-ui, sans-serif", fill: "#555" }, svg).textContent = label;
-          el("line", { x1: x + fs * 2.6, x2: x + fs * 2.6 + w, y1: y + 0.8, y2: y + 0.8, stroke: "#999", "stroke-width": 0.2 }, svg);
-          x -= 6;
-        }
-      }
-
-      function drawText(svg, g, row, baseY, layout) {
-        if (!row.text) return;
-        const attrs = {
-          x: g.left + layout.indent,
-          y: baseY,
-          "font-family": `"${state.font}", cursive`,
-          "font-size": layout.fontMm,
-          "xml:space": "preserve",
-        };
-        if (row.kind === "solid") attrs.fill = "#1f2a44";
-        else if (row.kind === "gray") attrs.fill = "#c4c4c4";
-        else
-          Object.assign(attrs, {
-            fill: "none",
-            stroke: "#7d7d7d",
-            "stroke-width": Math.max(0.18, g.h * 0.03),
-            "stroke-dasharray": `0.01 ${Math.max(0.5, g.h * 0.09)}`,
-            "stroke-linecap": "round",
-          });
-        el("text", attrs, svg).textContent = row.text;
-      }
-
-      function render() {
-        const g = geometry();
-        const layout = buildRows(g);
-        const { pages, perPage } = paginate(g, layout.blocks);
-
-        document.documentElement.style.setProperty("--pw", g.pw + "mm");
-        document.documentElement.style.setProperty("--ph", g.ph + "mm");
-        $("page-style").textContent = `@page { size: ${state.size} ${state.orient}; margin: 0; }`;
-
-        const preview = $("preview");
-        preview.replaceChildren();
-        for (const rows of pages) {
-          const wrapDiv = document.createElement("div");
-          wrapDiv.className = `sheet-wrap ${state.size} ${state.orient}`;
-          const svg = el("svg", { class: "sheet", viewBox: `0 0 ${g.pw} ${g.ph}`, width: g.pw + "mm", height: g.ph + "mm" }, wrapDiv);
-          el("rect", { width: g.pw, height: g.ph, fill: "#fff" }, svg);
-          drawHeader(svg, g);
-          drawHoles(svg, g);
-          const top = g.top + g.headerH;
-          drawRuling(svg, g, top, rows.length);
-          rows.forEach((row, i) => drawText(svg, g, row, top + i * g.pitch + g.asc + g.h, layout));
-          preview.appendChild(wrapDiv);
-        }
-
-        const charsPerRow = Math.floor(layout.avail / widthMm("а", state.font, layout.fontMm));
-        $("stats").textContent =
-          `≈ ${charsPerRow} букв в строке · ${perPage} строк на листе · страниц: ${pages.length}`;
-      }
-
-      let raf = 0;
-      function scheduleRender() {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(render);
-      }
-
-      // ---------- user fonts (kept in IndexedDB, never uploaded anywhere) ----------
-      function fontDb() {
-        return new Promise((resolve, reject) => {
-          const req = indexedDB.open("printables-fonts", 1);
-          req.onupgradeneeded = () => req.result.createObjectStore("fonts", { keyPath: "name" });
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
-        });
-      }
-
-      async function dbOp(mode, fn) {
-        const db = await fontDb();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction("fonts", mode);
-          const req = fn(tx.objectStore("fonts"));
-          tx.oncomplete = () => resolve(req?.result);
-          tx.onerror = () => reject(tx.error);
-        });
-      }
-
-      async function addCustomFont(name, data) {
-        const face = new FontFace(name, data);
-        await face.load();
-        document.fonts.add(face);
-        const group = $("custom-fonts");
-        if (![...group.children].some((o) => o.value === name)) group.appendChild(new Option(name, name));
-        group.hidden = false;
-        $("font-clear").hidden = false;
-        delete xRatioCache[name];
-      }
-
-      $("font-file").addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        e.target.value = "";
-        if (!file) return;
-        const name = file.name.replace(/\.[^.]+$/, "").replace(/["\\]/g, "").trim() || "Свой шрифт";
-        const data = await file.arrayBuffer();
-        try {
-          await addCustomFont(name, data);
-        } catch {
-          alert("Не удалось прочитать шрифт. Нужен файл TTF, OTF, WOFF или WOFF2.");
-          return;
-        }
-        try { await dbOp("readwrite", (st) => st.put({ name, data })); } catch {}
-        set({ font: name });
-        $("font").value = name;
-      });
-
-      $("font-clear").addEventListener("click", async () => {
-        try { await dbOp("readwrite", (st) => st.clear()); } catch {}
-        const custom = [...$("custom-fonts").children].map((o) => o.value);
-        $("custom-fonts").replaceChildren();
-        $("custom-fonts").hidden = true;
-        $("font-clear").hidden = true;
-        if (custom.includes(state.font)) set({ font: recommended(state.level, state.size).font });
-        $("font").value = state.font;
-      });
-
-      async function loadCustomFonts() {
-        try {
-          if ((await document.fonts.load('20px "Прописи"', "Аа")).length)
-            $("font").querySelector("optgroup").prepend(new Option("Прописи — школьный (локально)", "Прописи"));
-        } catch {}
-        try {
-          // IndexedDB can stall on file:// pages; don't let it block the font list.
-          const timeout = new Promise((_, reject) => setTimeout(reject, 1500));
-          const all = await Promise.race([dbOp("readonly", (st) => st.getAll()), timeout]);
-          for (const f of all || []) await addCustomFont(f.name, f.data).catch(() => {});
-        } catch {}
-        // A saved custom font that is gone falls back to the level's font.
-        if (![...$("font").options].some((o) => o.value === state.font))
-          state.font = recommended(state.level, state.size).font;
-        syncControls();
-        render();
-      }
-
-      syncControls();
-      render();
-      loadCustomFonts();
-      // Fonts arrive asynchronously; metrics change once each one loads.
-      Promise.all(
-        [...$("font").options].map((o) => o.value).map((f) =>
-          document.fonts.load(`20px "${f}"`, "АаБбмх").catch(() => {}),
-        ),
-      ).then(() => {
-        for (const k in xRatioCache) delete xRatioCache[k];
-        render();
-      });
-
-      // Precache the page and fonts so it keeps working offline (file:// already works without it).
-      if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
-        navigator.serviceWorker.register("sw.js").catch(() => {});
+      sync();
     </script>
   </body>
 </html>
